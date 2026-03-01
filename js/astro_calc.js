@@ -1,7 +1,101 @@
+// --------------------------------------------------------------------
+// Swiss Ephemeris integration (uses window.sweInstance when available)
+// --------------------------------------------------------------------
+
+/**
+ * Extract ascendant longitude from Swiss Eph houses() result.
+ * Handles multiple possible return formats from different wrapper versions.
+ */
+function getAscFromHouseResult(result) {
+  if (!result) return null;
+  if (typeof result.ascendant === 'number') return result.ascendant;
+  if (result.ascmc && typeof result.ascmc[0] === 'number') return result.ascmc[0];
+  if (Array.isArray(result) && result.length >= 2 &&
+      Array.isArray(result[1]) && typeof result[1][0] === 'number') {
+    return result[1][0];
+  }
+  return null;
+}
+
+/**
+ * Calculate planetary positions using Swiss Ephemeris.
+ * Returns the same array format as the built-in engine.
+ */
+function calculatePlanetaryPositionsSwe(t, cityInfo) {
+  const swe = window.sweInstance;
+  const jd = t * 36525.0 + 2451545.0;
+
+  // Geographic coords: Swiss Eph uses East+, North+
+  let geoLon = parseFloat(cityInfo.longitude.degrees) + parseFloat(cityInfo.longitude.minutes / 60);
+  if (cityInfo.longitude.direction === 'W') geoLon *= -1;
+  let geoLat = parseFloat(cityInfo.latitude.degrees) + parseFloat(cityInfo.latitude.minutes / 60);
+  if (cityInfo.latitude.direction === 'S') geoLat *= -1;
+
+  const flags = swe.SEFLG_SWIEPH | swe.SEFLG_SIDEREAL;
+
+  // --- Ascendant ---
+  // Get tropical ascendant from houses(), then subtract ayanamsa
+  const houseResult = swe.houses(jd, geoLat, geoLon, 'W');
+  const tropicalAsc = getAscFromHouseResult(houseResult);
+  const ayanamsa = swe.get_ayanamsa_ut(jd);
+  let pp = new Array(10);
+  pp[0] = tropicalAsc !== null
+    ? (((tropicalAsc - ayanamsa) % 360) + 360) % 360
+    : 0;
+
+  // --- Planet positions (sidereal via SEFLG_SIDEREAL) ---
+  const sweBodyIds = [
+    swe.SE_SUN,        // pp[1]
+    swe.SE_MOON,       // pp[2]
+    swe.SE_MARS,       // pp[3]
+    swe.SE_MERCURY,    // pp[4]
+    swe.SE_JUPITER,    // pp[5]
+    swe.SE_VENUS,      // pp[6]
+    swe.SE_SATURN,     // pp[7]
+    swe.SE_MEAN_NODE   // pp[8] = Rahu (mean node)
+  ];
+
+  for (let i = 0; i < sweBodyIds.length; i++) {
+    const pos = swe.calc_ut(jd, sweBodyIds[i], flags);
+    pp[i + 1] = ((pos[0] % 360) + 360) % 360;
+  }
+
+  // Ketu = Rahu + 180°
+  pp[9] = (pp[8] + 180) % 360;
+
+  // --- Build planetaryPositions array (same format as built-in engine) ---
+  let signIndices = chPlanets(pp);
+  let planetaryPositions = [];
+  let planetNames = ['Ascendant', 'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
+
+  for (let i = 0; i < planetNames.length; i++) {
+    let longitude = pp[i].toFixed(1);
+    let zodiacSign = signIndices[i] ? indianZodiacTamil[signIndices[i] - 1] : 'N/A';
+    let nakshatraPada = calculateNakshatraPada(pp[i]);
+    let nakshatraIndex = Math.floor(pp[i] / 13.33);
+    let nakshatraLord = nakshatraLordsTamil[nakshatraIndex % 27];
+    let houseNumber = (signIndices[i] - signIndices[0] + 12) % 12 + 1;
+
+    planetaryPositions.push({
+      name: planetNames[i],
+      nakshatraPada: nakshatraPada.nakshatra + ' ' + nakshatraPada.pada,
+      zodiacSign: zodiacSign,
+      degree: (pp[i] % 30).toFixed(1),
+      longitude: parseFloat(longitude),
+      nakshatraLord: nakshatraLord,
+      houseNumber: houseNumber
+    });
+  }
+
+  return planetaryPositions;
+}
+
+// --------------------------------------------------------------------
+
 /**
  * Calculate the Nakshatra name (Tamil) and Pada from a given degree.
  * @param {number} degree - Planetary longitude in degrees.
- * @returns {{nakshatra: string, pada: number}} 
+ * @returns {{nakshatra: string, pada: number}}
  */
 function calculateNakshatraPada(degree) {
   const degreesPerNakshatra = 40 / 3;  // exactly 13.3333...
@@ -39,6 +133,12 @@ function calculateNavamsaPosition(longitude) {
  * @returns {Array} Planetary positions array with name, nakshatraPada, etc.
  */
 function calculatePlanetaryPositions(t, timeData, cityInfo) {
+  // Use Swiss Ephemeris when available (more accurate)
+  if (window.sweInstance) {
+    return calculatePlanetaryPositionsSwe(t, cityInfo);
+  }
+
+  // --- Fall back to built-in VSOP engine ---
   let lon = parseFloat(cityInfo.longitude.degrees) + parseFloat(cityInfo.longitude.minutes / 60);
   if (cityInfo.longitude.direction === 'E') {
     lon *= -1;
@@ -48,22 +148,17 @@ function calculatePlanetaryPositions(t, timeData, cityInfo) {
     lat *= -1;
   }
 
-  // Ascendant calculation
-  let as = ascendant(t, timeData.time, lon, lat); // user-provided ascendant() function
+  let as = ascendant(t, timeData.time, lon, lat);
   let pp = new Array(10);
   pp[0] = as;
 
-  // Populate other planet positions
-  planets(t, pp, 1); // user-provided planets() function
+  planets(t, pp, 1);
 
-  // Determine sign indices for each planet
   let signIndices = chPlanets(pp);
-
   let planetaryPositions = [];
-  let planetsEng = ['Ascendant', 'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
-  let planetsTamil = ['Ascendant', 'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
+  let planetNames = ['Ascendant', 'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
 
-  for (let i = 0; i < planetsEng.length; i++) {
+  for (let i = 0; i < planetNames.length; i++) {
     let longitude = (pp[i] !== undefined && !isNaN(pp[i])) ? pp[i].toFixed(1) : 'N/A';
     let degreeInSign = (pp[i] !== undefined && !isNaN(pp[i])) ? (pp[i] % 30).toFixed(1) : 'N/A';
     let zodiacSign = signIndices[i] ? indianZodiacTamil[signIndices[i] - 1] : 'N/A';
@@ -75,7 +170,7 @@ function calculatePlanetaryPositions(t, timeData, cityInfo) {
     let houseNumber = (signIndices[i] - signIndices[0] + 12) % 12 + 1;
 
     planetaryPositions.push({
-      name: planetsTamil[i],
+      name: planetNames[i],
       nakshatraPada: nakshatraPada.nakshatra + ' ' + nakshatraPada.pada,
       zodiacSign: zodiacSign,
       degree: degreeInSign,

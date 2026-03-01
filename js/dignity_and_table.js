@@ -90,7 +90,8 @@ function displayPlanetaryTable(planetaryPositions, planetaryPositionsLater) {
     const planetLater = planetaryPositionsLater.find(p => p.name === planet.name);
     let retroSymbol = '';
 
-    if (planet.name !== 'Rahu' && planet.name !== 'Ketu' && planetLater) {
+    if (planet.name !== 'Rahu' && planet.name !== 'Ketu' &&
+        planet.name !== 'Ascendant' && planet.name !== 'Maandi' && planetLater) {
       if (isRetrograde(planet.longitude, planetLater.longitude)) {
         retroSymbol = '(R)';
       }

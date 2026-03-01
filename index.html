@@ -18,6 +18,24 @@
   <script src="js/planterms2.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <!-- Swiss Ephemeris WASM (async module, falls back to built-in engine if unavailable) -->
+  <script type="module">
+    import SwissEph from 'https://cdn.jsdelivr.net/npm/swisseph-wasm@latest/src/swisseph.js';
+    try {
+      const swe = new SwissEph();
+      await swe.initSwissEph();
+      swe.set_sid_mode(swe.SE_SIDM_LAHIRI, 0, 0);
+      window.sweInstance = swe;
+      console.log('Swiss Ephemeris loaded (Lahiri ayanamsa)');
+      // Re-render with higher-accuracy engine
+      if (typeof calculatePositions === 'function') {
+        calculatePositions();
+      }
+    } catch (err) {
+      console.warn('Swiss Ephemeris unavailable, using built-in engine:', err);
+    }
+  </script>
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -614,6 +632,12 @@ function calculatePositions() {
   // 3. Calculate planetary positions for birth moment
   const planetaryPositions = calculatePlanetaryPositions(dateData.t, timeData, cityInfo);
 
+  // Show which engine is active
+  const engineLabel = document.getElementById('engineLabel');
+  if (engineLabel) {
+    engineLabel.textContent = window.sweInstance ? '| Swiss Ephemeris' : '| Built-in Engine';
+  }
+
   // 4. Add Maanti position
   addMaantiPosition(
     planetaryPositions,
@@ -1084,7 +1108,7 @@ function extractTimeData(hour, minutes, cityInfo) {
     <img src="ganesha.jpg" alt="Ganesha">
     <div class="report-header-text">
       <p class="report-title">Sri Karpaka Vinayagar Astrology</p>
-      <p class="report-subtitle">by Ravichandran (version 2)</p>
+      <p class="report-subtitle">by Ravichandran (version 2) <span id="engineLabel" style="font-size:11px; color:#888;"></span></p>
     </div>
   </div>
 
