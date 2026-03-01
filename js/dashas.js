@@ -21,12 +21,12 @@ function getDashas(jd, nd) {
 
 function getDashasTam(jd, nd) {
   let s = '<div style="font-family: monospace">';
-  s += '<p>---தசாபுக்தி துவக்கங்கள்---</p>';
+  s += '<p>---Dasha-Bhukti Beginnings---</p>';
   s += '</div>';
   s += '<div><span style="font-family: monospace">';
 
   for (let yd = 0, xoff = 0, cnt = 0, nt = nd, idx = getdashastart(), i = 0; i < 9; i++) {
-    s += dlnamtam[nt] + ' தசை:<br>';
+    s += dlnamtam[nt] + ' Dasha:<br>';
     for (let j = 0; j < 9 && (s += bhuktistring(nd, idx, jd) + '&nbsp;&nbsp;', ++idx % 9 !== 0); j++) {
       if (j % 3 === 2) s += '<br>';
     }
@@ -121,7 +121,7 @@ function diffYMD(fromDate, toDate) {
 }
 
 function formatTamilAge(ymd) {
-  return `${ymd.years} வரு. ${ymd.months} மா. ${ymd.days} நாள்`;
+  return `${ymd.years}y ${ymd.months}m ${ymd.days}d`;
 }
 
 function formatYMDHyphen(ymd) {
@@ -170,8 +170,8 @@ function makeDashaTimelineStrip(dashas, offsetNow) {
   return `<div class="dasha-sequence-wrap">
     <div class="dasha-sequence-track">
       ${segmentHtml}
-      <div class="dasha-marker dasha-marker-birth" style="left:0%;"><span>பிறப்பு</span></div>
-      <div class="dasha-marker dasha-marker-now" style="left:${currentPct}%;"><span>இன்று</span></div>
+      <div class="dasha-marker dasha-marker-birth" style="left:0%;"><span>Birth</span></div>
+      <div class="dasha-marker dasha-marker-now" style="left:${currentPct}%;"><span>Today</span></div>
     </div>
   </div>`;
 }
@@ -185,16 +185,16 @@ function makeDashaSummaryPanel(dashas, birthJD, offsetNow) {
   const natalDasha = dashas[0];
   const natalEndJD = birthJD + natalDasha.endOffset;
   const natalBalanceYMD = diffYMD(birthDate, jdToUtcDate(natalEndJD));
-  const natalBalanceText = `${natalDasha.lord} தசை ${formatTamilAge(natalBalanceYMD)}`;
+  const natalBalanceText = `${natalDasha.lord} Dasha ${formatTamilAge(natalBalanceYMD)}`;
 
-  let currentDashaBhuktiText = 'தற்போதைய தசை/புக்தி ஏதுமில்லை';
+  let currentDashaBhuktiText = 'No current Dasha/Bhukti';
 
   if (currDashaIdx >= 0) {
     const currentDasha = dashas[currDashaIdx];
     const currentDashaEnd = (currentDasha.endOffset !== null)
       ? jul2dateDDMMYYYY(birthJD + currentDasha.endOffset)
       : '—';
-    currentDashaBhuktiText = `${currentDasha.lord} தசை ${currentDashaEnd} வரை.`;
+    currentDashaBhuktiText = `${currentDasha.lord} Dasha until ${currentDashaEnd}.`;
 
     const currBhuktiIdx = currentDasha.subLords.findIndex(
       sub => offsetNow >= sub.startOffset && offsetNow < sub.endOffset
@@ -202,16 +202,16 @@ function makeDashaSummaryPanel(dashas, birthJD, offsetNow) {
     if (currBhuktiIdx >= 0) {
       const currentBhukti = currentDasha.subLords[currBhuktiIdx];
       const currentBhuktiEnd = jul2dateDDMMYYYY(birthJD + currentBhukti.endOffset);
-      currentDashaBhuktiText += ` ${currentBhukti.lord} புக்தி ${currentBhuktiEnd} வரை.`;
+      currentDashaBhuktiText += ` ${currentBhukti.lord} Bhukti until ${currentBhuktiEnd}.`;
     }
   }
 
   const timelineStrip = makeDashaTimelineStrip(dashas, offsetNow);
 
   return `<div class="dasha-summary-panel">
-    <div class="dasha-summary-item"><span>பிறப்பு தசை இருப்பு:</span> ${natalBalanceText}</div>
-    <div class="dasha-summary-item"><span>நடப்பு வயது:</span> ${currentAge}</div>
-    <div class="dasha-summary-item dasha-summary-item-wide"><span>நடப்பு தசாபுக்தி:</span> ${currentDashaBhuktiText}</div>
+    <div class="dasha-summary-item"><span>Natal Dasha Balance:</span> ${natalBalanceText}</div>
+    <div class="dasha-summary-item"><span>Current Age:</span> ${currentAge}</div>
+    <div class="dasha-summary-item dasha-summary-item-wide"><span>Current Dasha-Bhukti:</span> ${currentDashaBhuktiText}</div>
     ${timelineStrip}
   </div>`;
 }
@@ -274,7 +274,7 @@ function makeDashaTables(dashas, birthJD, offsetNow) {
   const currDashaIdx = findCurrentDashaIndex(dashas, offsetNow);
   const summaryPanel = makeDashaSummaryPanel(dashas, birthJD, offsetNow);
 
-  let dashaTable = `<h4>தசை வரிசை</h4><table><thead><tr><th>மஹாதசை</th><th>தொடக்கம்</th><th>முடிவு</th></tr></thead><tbody>`;
+  let dashaTable = `<h4>Dasha Sequence</h4><table><thead><tr><th>Mahadasha</th><th>Start</th><th>End</th></tr></thead><tbody>`;
 
   dashas.forEach((dasha, i) => {
     const highlight = (i === currDashaIdx) ? ' style="background-color: #ccffcc;"' : '';
@@ -298,7 +298,7 @@ function makeDashaTables(dashas, birthJD, offsetNow) {
     const subs = dashas[currDashaIdx].subLords;
     const currBhuktiIdx = subs.findIndex(sub => offsetNow >= sub.startOffset && offsetNow < sub.endOffset);
 
-    bhuktiTable = `<h4>${dashas[currDashaIdx].lord} தசை: புக்தி வரிசை</h4><table><thead><tr><th>புக்தி</th><th>தொடக்கம்</th><th>முடிவு</th></tr></thead><tbody>`;
+    bhuktiTable = `<h4>${dashas[currDashaIdx].lord} Dasha: Bhukti Sequence</h4><table><thead><tr><th>Bhukti</th><th>Start</th><th>End</th></tr></thead><tbody>`;
 
     subs.forEach((sub, j) => {
       const highlight = (j === currBhuktiIdx) ? ' style="background-color: #ccffcc;"' : '';
@@ -316,7 +316,7 @@ function makeDashaTables(dashas, birthJD, offsetNow) {
       const antaras = subs[currBhuktiIdx].antaras;
       const currAntaraIdx = antaras.findIndex(antara => offsetNow >= antara.startOffset && offsetNow < antara.endOffset);
 
-      antaraTable = `<h4>${dashas[currDashaIdx].lord} - ${subs[currBhuktiIdx].lord} அந்தரம் வரிசை</h4><table><thead><tr><th>அந்தரம்</th><th>தொடக்கம்</th><th>முடிவு</th></tr></thead><tbody>`;
+      antaraTable = `<h4>${dashas[currDashaIdx].lord} - ${subs[currBhuktiIdx].lord} Antara Sequence</h4><table><thead><tr><th>Antara</th><th>Start</th><th>End</th></tr></thead><tbody>`;
       
       antaras.forEach((antara, k) => {
         const highlight = (k === currAntaraIdx) ? ' style="background-color: #ccffcc;"' : '';
@@ -329,11 +329,11 @@ function makeDashaTables(dashas, birthJD, offsetNow) {
       
       antaraTable += `</tbody></table>`;
     } else {
-      antaraTable = `<table><thead><tr><th colspan="3">தற்போதைய அந்தரம் ஏதுமில்லை</th></tr></thead></table>`;
+      antaraTable = `<table><thead><tr><th colspan="3">No current Antara</th></tr></thead></table>`;
     }
   } else {
-    bhuktiTable = `<table><thead><tr><th colspan="3">தற்போதைய தசை ஏதுமில்லை</th></tr></thead></table>`;
-    antaraTable = `<table><thead><tr><th colspan="3">தற்போதைய அந்தரம் ஏதுமில்லை</th></tr></thead></table>`;
+    bhuktiTable = `<table><thead><tr><th colspan="3">No current Dasha</th></tr></thead></table>`;
+    antaraTable = `<table><thead><tr><th colspan="3">No current Antara</th></tr></thead></table>`;
   }
 
   // Return explicitly Dasha-Bhukti-Antara side-by-side
@@ -373,13 +373,13 @@ function showBhuktis(mahadashaIndex) {
   }
 
   // Build Bhukti table with clickable rows for Antara
-  let bhuktiTable = `<h4>${currentDashaLord} தசை: புக்தி வரிசை</h4>
+  let bhuktiTable = `<h4>${currentDashaLord} Dasha: Bhukti Sequence</h4>
     <table>
       <thead>
         <tr>
-          <th>புக்தி</th>
-          <th>தொடக்கம்</th>
-          <th>முடிவு</th>
+          <th>Bhukti</th>
+          <th>Start</th>
+          <th>End</th>
         </tr>
       </thead>
       <tbody>`;
@@ -439,13 +439,13 @@ function showAntaras(mahadashaIndex, bhuktiIndex) {
     offsetNow >= antara.startOffset && offsetNow < antara.endOffset
   );
 
-  let antaraTable = `<h4>${currentDashaLord}/${currentBhuktiLord} : அந்தர வரிசை</h4>
+  let antaraTable = `<h4>${currentDashaLord}/${currentBhuktiLord} : Antara Sequence</h4>
     <table>
       <thead>
         <tr>
-          <th>அந்தரம்</th>
-          <th>தொடக்கம்</th>
-          <th>முடிவு</th>
+          <th>Antara</th>
+          <th>Start</th>
+          <th>End</th>
         </tr>
       </thead>
       <tbody>`;
@@ -484,7 +484,7 @@ function showAntaras(mahadashaIndex, bhuktiIndex) {
  * Final display function for dashas using the new approach.
  */
 function displayDashas(planetaryPositions, birthJD) {
-  let moon = planetaryPositions.find(p => p.name === 'சந்திரன்');
+  let moon = planetaryPositions.find(p => p.name === 'Moon');
   if (!moon) {
     document.getElementById('dashasContainer').innerHTML = 'Moon position not found.';
     return;

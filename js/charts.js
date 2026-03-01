@@ -23,17 +23,17 @@ function drawSouthChart(x, y, w, h, planetDetails, currentDate, currentTime, cur
   let s = '<g>\n';
 
   const glyphMapping = {
-    'லக்னம்': 'லக்',
-    'சூரியன்': 'சூரி',
-    'சந்திரன்': 'சந்',
-    'செவ்வாய்': 'செவ்',
-    'புதன்': 'புத',
-    'குரு': 'குரு',
-    'சுக்கிரன்': 'சுக்',
-    'சனி': 'சனி',
-    'ராகு': 'ராகு',
-    'கேது': 'கேது',
-    'மாந்தி': 'மா',
+    'Ascendant': 'Lag',
+    'Sun': 'Sun',
+    'Moon': 'Moo',
+    'Mars': 'Mar',
+    'Mercury': 'Mer',
+    'Jupiter': 'Jup',
+    'Venus': 'Ven',
+    'Saturn': 'Sat',
+    'Rahu': 'Rah',
+    'Ketu': 'Ket',
+    'Maandi': 'Maa',
   };
 
   let housePlanets = Array.from({length: 12}, () => []);
@@ -55,7 +55,7 @@ function drawSouthChart(x, y, w, h, planetDetails, currentDate, currentTime, cur
   }
 
   let lagnaIndex = null;
-  const ascPlanet = planetDetails.find(p => p.name === 'லக்னம்');
+  const ascPlanet = planetDetails.find(p => p.name === 'Ascendant');
   if (ascPlanet && !isNaN(ascPlanet.longitude)) {
     lagnaIndex = Math.floor((ascPlanet.longitude % 360) / 30);
   }
@@ -109,8 +109,8 @@ function drawSouthChart(x, y, w, h, planetDetails, currentDate, currentTime, cur
 
   const centerX = x + w / 2;
   const centerY = y + h / 2;
-  s += `<text x="${centerX}" y="${centerY - 20}" fill="black" font-size="11" font-family="monospace" text-anchor="middle">ஸ்ரீ கற்பக விநாயகர் துணை</text>\n`;
-  s += `<text x="${centerX}" y="${centerY}" fill="blue" font-size="15" font-family="monospace" font-weight="bold" text-anchor="middle">ராசி</text>\n`;
+  s += `<text x="${centerX}" y="${centerY - 20}" fill="black" font-size="11" font-family="monospace" text-anchor="middle">Sri Karpaka Vinayagar</text>\n`;
+  s += `<text x="${centerX}" y="${centerY}" fill="blue" font-size="15" font-family="monospace" font-weight="bold" text-anchor="middle">Rasi</text>\n`;
   s += `<text x="${centerX}" y="${centerY + 20}" fill="black" font-size="16" font-family="monospace" text-anchor="middle">${currentDate}</text>\n`;
   s += `<text x="${centerX}" y="${centerY + 40}" fill="black" font-size="16" font-family="monospace" text-anchor="middle">${currentTime}</text>\n`;
   s += `<text x="${centerX}" y="${centerY + 60}" fill="black" font-size="14" font-family="monospace" text-anchor="middle">${currentCity}</text>\n`;
@@ -138,18 +138,17 @@ function drawNavamsaChart(x, y, w, h, planetDetails) {
   
   // Glyph mapping: key = full name, value = new glyph.
   const glyphMapping = {
-    'லக்னம்': 'லக்',
-    'சூரியன்':  'சூரி',
-    'சந்திரன்':  'சந்',
-    'செவ்வாய்': 'செவ்',
-    'புதன்': 'புத',
-    'குரு': 'குரு',
-    'சுக்கிரன்':  'சுக்',
-    'சனி': 'சனி',
-    'ராகு': 'ராகு',
-    'கேது': 'கேது',
-    'மாந்தி': 'மா',
-
+    'Ascendant': 'Lag',
+    'Sun': 'Sun',
+    'Moon': 'Moo',
+    'Mars': 'Mar',
+    'Mercury': 'Mer',
+    'Jupiter': 'Jup',
+    'Venus': 'Ven',
+    'Saturn': 'Sat',
+    'Rahu': 'Rah',
+    'Ketu': 'Ket',
+    'Maandi': 'Maa',
   };
 
   // Create an array (for 12 houses) to group glyphs by navamsa.
@@ -196,7 +195,7 @@ function drawNavamsaChart(x, y, w, h, planetDetails) {
   // Center the Navamsa chart label.
   const centerX = x + w / 2;
   const centerY = y + h / 2;
-  s += `<text x="${centerX}" y="${centerY}" fill="blue" font-size="16" font-family="monospace" font-weight="bold" font-color="blue" text-anchor="middle">நவாம்சம்</text>\n`;
+  s += `<text x="${centerX}" y="${centerY}" fill="blue" font-size="16" font-family="monospace" font-weight="bold" font-color="blue" text-anchor="middle">Navamsa</text>\n`;
   s += '</g>\n';
   return s;
 }
@@ -208,7 +207,7 @@ function displayChart(planetaryPositions, year, month, day, hour, minutes) {
   let currentDate = day + '-' + month + '-' + year;
   let currentTime = formatAMPM(hour, minutes);
   let selectedCity = document.getElementById('city').value;
-  let currentCity = cityTamilNames[selectedCity] || selectedCity; // fallback to English if Tamil not found
+  let currentCity = selectedCity; // use English city name
 
   // Keep a small inset margin so outer strokes do not get clipped on right/bottom edges.
   let svgContent = drawSouthChart(4, 4, 392, 392, planetaryPositions, currentDate, currentTime, currentCity);

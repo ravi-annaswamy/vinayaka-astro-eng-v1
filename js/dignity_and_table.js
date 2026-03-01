@@ -18,18 +18,18 @@ function isRetrograde(currentDeg, laterDeg) {
  */
 function signNameToIndex(signName) {
   const signMap = {
-    'மேஷம்': 1,
-    'ரிஷபம்': 2,
-    'மிதுனம்': 3,
-    'கடகம்': 4,
-    'சிம்மம்': 5,
-    'கன்னி': 6,
-    'துலாம்': 7,
-    'விருச்சிகம்': 8,
-    'தனுசு': 9,
-    'மகரம்': 10,
-    'கும்பம்': 11,
-    'மீனம்': 12
+    'Mesha': 1,
+    'Rishabha': 2,
+    'Mithuna': 3,
+    'Kataka': 4,
+    'Simha': 5,
+    'Kanya': 6,
+    'Thula': 7,
+    'Vrischika': 8,
+    'Dhanus': 9,
+    'Makara': 10,
+    'Kumbha': 11,
+    'Meena': 12
   };
   return signMap[signName] || 0;
 }
@@ -41,27 +41,27 @@ function signNameToIndex(signName) {
    debilitation: single sign index.
 */
 const planetDignities = {
-  'சூரியன்': { rulership: [5], exaltation: 1, debilitation: 7 },
-  'சந்திரன்': { rulership: [4], exaltation: 2, debilitation: 8 },
-  'செவ்வாய்': { rulership: [1, 8], exaltation: 10, debilitation: 4 },
-  'புதன்': { rulership: [3, 6], exaltation: 6, debilitation: 12 },
-  'குரு': { rulership: [9, 12], exaltation: 4, debilitation: 10 },
-  'சுக்கிரன்': { rulership: [2, 7], exaltation: 12, debilitation: 6 },
-  'சனி': { rulership: [10, 11], exaltation: 7, debilitation: 1 }
+  'Sun': { rulership: [5], exaltation: 1, debilitation: 7 },
+  'Moon': { rulership: [4], exaltation: 2, debilitation: 8 },
+  'Mars': { rulership: [1, 8], exaltation: 10, debilitation: 4 },
+  'Mercury': { rulership: [3, 6], exaltation: 6, debilitation: 12 },
+  'Jupiter': { rulership: [9, 12], exaltation: 4, debilitation: 10 },
+  'Venus': { rulership: [2, 7], exaltation: 12, debilitation: 6 },
+  'Saturn': { rulership: [10, 11], exaltation: 7, debilitation: 1 }
 };
 
 /**
- * Returns a dignity string ("ஆட்சி", "உச்சம்", "நீசம்", or "-") for the 
+ * Returns a dignity string ("Own Sign", "Exalted", "Debilitated", or "-") for the
  * given planetName in the given signIndex (1..12).
  */
 function getDignity(planetName, signIndex) {
-  if (planetName === 'ராகு' || planetName === 'கேது') return '-';
+  if (planetName === 'Rahu' || planetName === 'Ketu') return '-';
   let pd = planetDignities[planetName];
   if (!pd) return '-';
 
-  if (signIndex === pd.exaltation) return 'உச்சம்';
-  if (signIndex === pd.debilitation) return 'நீசம்';
-  if (pd.rulership.includes(signIndex)) return 'ஆட்சி';
+  if (signIndex === pd.exaltation) return 'Exalted';
+  if (signIndex === pd.debilitation) return 'Debilitated';
+  if (pd.rulership.includes(signIndex)) return 'Own Sign';
   return '-';
 }
 
@@ -78,12 +78,11 @@ function displayPlanetaryTable(planetaryPositions, planetaryPositionsLater) {
   let table = `
     <table>
       <tr>
-        <th>பாவகம்</th>
-        <th>கிரகம்</th>
-        <th>பாகை</th>
-        <th>நிலை</th>
-        <th>நட்சத்திரம் <br> பாதம்</th>
-        <th>நட்சத்திர <br>அதிபதி</th>
+        <th>House</th>
+        <th>Planet</th>
+        <th>Dignity</th>
+        <th>Nakshatra <br> Pada</th>
+        <th>Nakshatra <br>Lord</th>
       </tr>
   `;
 
@@ -91,24 +90,19 @@ function displayPlanetaryTable(planetaryPositions, planetaryPositionsLater) {
     const planetLater = planetaryPositionsLater.find(p => p.name === planet.name);
     let retroSymbol = '';
 
-    if (planet.name !== 'ராகு' && planet.name !== 'கேது' && planetLater) {
+    if (planet.name !== 'Rahu' && planet.name !== 'Ketu' && planetLater) {
       if (isRetrograde(planet.longitude, planetLater.longitude)) {
-        retroSymbol = '(வ)';
+        retroSymbol = '(R)';
       }
     }
 
     let signIndex = signNameToIndex(planet.zodiacSign);
     let dignity = getDignity(planet.name, signIndex);
 
-    // Longitude modulo 30 with degree symbol
-    let bhaagai = `${(planet.longitude % 30).toFixed(2)}°`;
-
-
     table += `
       <tr>
         <td>${planet.houseNumber}</td>
         <td>${planet.name} ${retroSymbol}</td>
-        <td style="text-align:center">${bhaagai}</td>
         <td>${dignity}</td>
         <td>${planet.nakshatraPada}</td>
         <td>${planet.nakshatraLord}</td>

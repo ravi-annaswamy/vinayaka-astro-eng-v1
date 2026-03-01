@@ -47,18 +47,18 @@ var indianZodiac = [
   'Meena'
 ];
 var indianZodiacTamil = [
-  'மேஷம்',
-  'ரிஷபம்',
-  'மிதுனம்',
-  'கடகம்',
-  'சிம்மம்',
-  'கன்னி',
-  'துலாம்',
-  'விருச்சிகம்',
-  'தனுசு',
-  'மகரம்',
-  'கும்பம்',
-  'மீனம்'
+  'Mesha',
+  'Rishabha',
+  'Mithuna',
+  'Kataka',
+  'Simha',
+  'Kanya',
+  'Thula',
+  'Vrischika',
+  'Dhanus',
+  'Makara',
+  'Kumbha',
+  'Meena'
 ];
 
 /* 
@@ -74,33 +74,34 @@ var nakshatraNames = [
   'Uttara Bhadrapada', 'Revati'
 ];
 var nakshatraNamesTamil = [
-  'அஸ்வினி', 'பரணி', 'கார்த்திகை', 'ரோகிணி', 'மிருகசீரிடம்', 'திருவாதிரை',
-  'புனர்பூசம்', 'பூசம்', 'ஆயில்யம்', 'மகம்', 'பூரம்', 'உத்திரம்',
-  'ஹஸ்தம்', 'சித்திரை', 'சுவாதி', 'விசாகம்', 'அனுஷம்',
-  'கேட்டை', 'மூலம்', 'பூராடம்', 'உத்திராடம்', 'திருவோணம்',
-  'அவிட்டம்', 'சதயம்', 'பூரட்டாதி', 'உத்திரட்டாதி', 'ரேவதி'
+  'Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashirsha', 'Ardra',
+  'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni',
+  'Uttara Phalguni', 'Hasta', 'Chitra', 'Swati', 'Vishakha',
+  'Anuradha', 'Jyeshta', 'Mula', 'Purva Ashadha', 'Uttara Ashadha',
+  'Shravana', 'Dhanishta', 'Shatabhisha', 'Purva Bhadrapada',
+  'Uttara Bhadrapada', 'Revati'
 ];
 
 var planetsTamil = [
-  'சூரியன்',
-  'சந்திரன்',
-  'செவ்வாய்',
-  'புதன்',
-  'குரு',
-  'சுக்கிரன்',
-  'சனி',
-  'ராகு',
-  'கேது',
-  'லக்னம்'
+  'Sun',
+  'Moon',
+  'Mars',
+  'Mercury',
+  'Jupiter',
+  'Venus',
+  'Saturn',
+  'Rahu',
+  'Ketu',
+  'Ascendant'
 ];
 
 var nakshatraLordsTamil = [
-  'கேது', 'சுக்கிரன்', 'சூரியன்', 'சந்திரன்', 'செவ்வாய்', 'ராகு',
-  'குரு', 'சனி', 'புதன்',
-  'கேது', 'சுக்கிரன்', 'சூரியன்', 'சந்திரன்', 'செவ்வாய்', 'ராகு',
-  'குரு', 'சனி', 'புதன்',
-  'கேது', 'சுக்கிரன்', 'சூரியன்', 'சந்திரன்', 'செவ்வாய்', 'ராகு',
-  'குரு', 'சனி', 'புதன்'
+  'Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu',
+  'Jupiter', 'Saturn', 'Mercury',
+  'Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu',
+  'Jupiter', 'Saturn', 'Mercury',
+  'Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu',
+  'Jupiter', 'Saturn', 'Mercury'
 ];
 
 const MAANTI_OFFSETS = {
@@ -121,6 +122,6 @@ var sml = false,
     dlist = new Array(81),
     dashyr = [7, 20, 6, 10, 7, 18, 16, 19, 17],
     dlnam = ['Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu', 'Jupiter', 'Saturn', 'Mercury'],
-    dlnamtam = ['கேது', 'சுக்கிரன்', 'சூரியன்', 'சந்திரன்', 'செவ்வாய்', 'ராகு', 'குரு', 'சனி', 'புதன்'],
+    dlnamtam = ['Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu', 'Jupiter', 'Saturn', 'Mercury'],
     dlstr = 'KeVeSuMoMaRaJuSaMe',
     ns = [100, 86, 16, 2, 2, 18, 10, 178, 2, 208, 16, 352, 100, 270, 196, 352, 280, 270, 192, 178, 280, 86, 196, 2];

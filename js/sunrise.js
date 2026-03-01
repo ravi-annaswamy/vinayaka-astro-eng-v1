@@ -120,18 +120,18 @@ function getLocalSunriseSunset(year, month, day, cityName) {
 
 
 function determineVedicWeekdayLocal(birthH, birthM, sunriseMin, sunsetMin, weekdayIndex) {
-  const weekdaysTamil = ['ஞாயிறு','திங்கள்','செவ்வாய்','புதன்','வியாழன்','வெள்ளி','சனி'];
+  const weekdaysTamil = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const birthMin = birthH*60 + birthM;
 
   let idx = weekdayIndex;
   let period;
   if (birthMin < sunriseMin) {
     idx = (idx + 6) % 7; // previous day
-    period = 'இரவு';
+    period = 'Vedic Nighttime';
   } else if (birthMin < sunsetMin) {
-    period = 'பகல்';
+    period = 'Vedic Daytime';
   } else {
-    period = 'இரவு';
+    period = 'Vedic Nighttime';
   }
   return `${weekdaysTamil[idx]} ${period}`;
 }

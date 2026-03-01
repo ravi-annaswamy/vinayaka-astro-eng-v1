@@ -172,12 +172,12 @@ function displayPanchang(thithi, yoga, karana, paksha, nakshatraInfo) {
 }
 
 function buildPanchangaSentence(thithi, yoga, karana, paksha, nakshatraInfo) {
-  const thithiName = THITHI_NAMES_TAMIL[thithi.name] || thithi.name;
-  const yogaName = YOGA_NAMES_TAMIL[yoga.name] || yoga.name;
-  const pakshaName = PAKSHA_TAMIL[paksha] || paksha;
-  const karanaName = KARANA_NAMES_TAMIL[karana.firstKarana.name] || karana.firstKarana.name;
+  const thithiName = thithi.name;
+  const yogaName = yoga.name;
+  const pakshaName = paksha;
+  const karanaName = karana.firstKarana.name;
   const thithiEnd = formatPanchangaTime(thithi.endTime);
-  return `${nakshatraInfo.nakshatra} நக்ஷத்திரம் ${pakshaName} ${thithiName} திதி (${thithiEnd} வரை) ${karanaName} கரணம் ${yogaName} யோகம்`;
+  return `${nakshatraInfo.nakshatra} Nakshatra | ${pakshaName} | ${thithiName} Thithi (until ${thithiEnd}) | ${karanaName} Karana | ${yogaName} Yoga`;
 }
 
 function formatPanchangaTime(hoursValue) {

@@ -576,11 +576,11 @@ function displayVedicInfo(year, month, day, hour, minute, city) {
   document.getElementById('panchangInfo').innerHTML = `
     <table class="summary-table">
       <tr>
-        <th>நாள் விவரம்</th>
-        <td>நாள்: ${dateStr} ${birthTimeStr} | சூரிய உதயம்: ${sunriseStr}, அஸ்தமனம்: ${sunsetStr} | ${vedicWeekday} பொழுது</td>
+        <th>Date Details</th>
+        <td>Date: ${dateStr} ${birthTimeStr} | Sunrise: ${sunriseStr}, Sunset: ${sunsetStr} | ${vedicWeekday}</td>
       </tr>
       <tr>
-        <th>பஞ்சாங்கம்</th>
+        <th>Panchanga</th>
         <td id="panchangaLine"></td>
       </tr>
     </table>
@@ -649,10 +649,10 @@ function normalizeAngleDelta(current, next) {
 }
 
 function renderPanchanga(planetaryPositions, planetaryPositionsLater, hour, minutes) {
-  const sunNow = planetaryPositions.find(p => p.name === 'சூரியன்');
-  const moonNow = planetaryPositions.find(p => p.name === 'சந்திரன்');
-  const sunLater = planetaryPositionsLater.find(p => p.name === 'சூரியன்');
-  const moonLater = planetaryPositionsLater.find(p => p.name === 'சந்திரன்');
+  const sunNow = planetaryPositions.find(p => p.name === 'Sun');
+  const moonNow = planetaryPositions.find(p => p.name === 'Moon');
+  const sunLater = planetaryPositionsLater.find(p => p.name === 'Sun');
+  const moonLater = planetaryPositionsLater.find(p => p.name === 'Moon');
 
   if (!sunNow || !moonNow || !sunLater || !moonLater) {
     const panchangaLine = document.getElementById('panchangaLine');
@@ -918,7 +918,7 @@ function addMaantiPosition(targetArray, birthInfo, positions) {
 
   // Lookup offset and compute longitude
   const offset = MAANTI_OFFSETS[vedicWeekday][period];
-  const sun = positions.find(p => p.name === 'சூரியன்');
+  const sun = positions.find(p => p.name === 'Sun');
   if (!sun) return;
 
   const rawLong = (sun.longitude + offset) % 360;
@@ -930,12 +930,12 @@ function addMaantiPosition(targetArray, birthInfo, positions) {
 
   // Calculate house number from ascendant sign
   // first find the ascendant’s longitude
-  const asc = positions.find(p => p.name === 'லக்னம்');
+  const asc = positions.find(p => p.name === 'Ascendant');
   const ascSignIdx = Math.floor(asc.longitude / 30);
   const houseNum = ((signIdx - ascSignIdx + 12) % 12) + 1;
 
   targetArray.push({
-    name: 'மாந்தி',
+    name: 'Maandi',
     longitude: Number(maantiLong.toFixed(1)),
     zodiacSign: indianZodiacTamil[signIdx],
     nakshatraPada: `${nak.nakshatra} ${nak.pada}`,
@@ -1074,7 +1074,7 @@ function extractTimeData(hour, minutes, cityInfo) {
 
   <!-- Button to trigger calculation -->
   <div class="form-control">
-    <button onclick="calculatePositions()"><b>கணக்கிடுக</b></button>
+    <button onclick="calculatePositions()"><b>Calculate</b></button>
   </div>
   </div>
 </div>
@@ -1083,8 +1083,8 @@ function extractTimeData(hour, minutes, cityInfo) {
   <div class="report-header">
     <img src="ganesha.jpg" alt="Ganesha">
     <div class="report-header-text">
-      <p class="report-title">ஸ்ரீ கற்பக விநாயகர் கணியன்</p>
-      <p class="report-subtitle">by ரவிச்சந்திரன் (version 2)</p>
+      <p class="report-title">Sri Karpaka Vinayagar Astrology</p>
+      <p class="report-subtitle">by Ravichandran (version 2)</p>
     </div>
   </div>
 
