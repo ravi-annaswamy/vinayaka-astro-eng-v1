@@ -62,6 +62,12 @@ python3 -m http.server 8080
 
 Then open `http://localhost:8080`.
 
+## Contributors
+
+- **Ravichandran** — original author and domain expert
+- **Claude (Anthropic)** — UI translation, Swiss Ephemeris integration, engineering assistance
+- **Codex (OpenAI)** — prior development contributions
+
 ## Notes
 
 - Rashi names: Mesha, Rishabha, Mithuna, Kataka, Simha, Kanya, Thula, Vrischika, Dhanus, Makara, Kumbha, Meena.
