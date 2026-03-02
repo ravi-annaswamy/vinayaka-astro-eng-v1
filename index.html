@@ -613,7 +613,8 @@ function displayVedicInfo(year, month, day, hour, minute, city) {
   const { sunriseStr, sunsetStr, sunriseMinutes, sunsetMinutes } =
           getLocalSunriseSunset(year, month, day, city);
 
-  const dateStr = `${day}-${month}-${year}`;
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dateStr = `${day}-${monthNames[month - 1]}-${year}`;
   const birthTimeStr = formatAMPM(hour, minute);
 
   // Day of week 0=Sun…6=Sat in JS
@@ -622,11 +623,30 @@ function displayVedicInfo(year, month, day, hour, minute, city) {
     hour, minute, sunriseMinutes, sunsetMinutes, weekdayIndex
   );
 
+  // Location metadata for reproducibility
+  const cityInfo = getCityInfo(city);
+  let locationStr = city;
+  if (cityInfo) {
+    const lat = cityInfo.latitude;
+    const lon = cityInfo.longitude;
+    const tz = cityInfo.timezone;
+    const latStr = `${lat.degrees}\u00B0${String(lat.minutes).padStart(2,'0')}'${lat.direction}`;
+    const lonStr = `${lon.degrees}\u00B0${String(lon.minutes).padStart(2,'0')}'${lon.direction}`;
+    const tzSign = tz.direction === 'E' ? '+' : '-';
+    const tzStr = `UTC${tzSign}${tz.hours}:${String(tz.minutes).padStart(2,'0')}`;
+    const dstStr = cityInfo.dst ? 'DST' : 'No DST';
+    locationStr = `${city} | Lat: ${latStr}, Lon: ${lonStr} | ${cityInfo.timezoneName} (${tzStr}) | ${dstStr}`;
+  }
+
   document.getElementById('panchangInfo').innerHTML = `
     <table class="summary-table">
       <tr>
         <th>Date Details</th>
         <td>Date: ${dateStr} ${birthTimeStr} | Sunrise: ${sunriseStr}, Sunset: ${sunsetStr} | ${vedicWeekday}</td>
+      </tr>
+      <tr>
+        <th>Location</th>
+        <td>${locationStr}</td>
       </tr>
       <tr>
         <th>Panchanga</th>
@@ -1113,36 +1133,46 @@ function extractTimeData(hour, minutes, cityInfo) {
 <div class="form-control">
   <label for="city">City:</label>
   <select id="city">
-    <option value="Chennai">Chennai</option>
-    <option value="Tiruchirappalli">Tiruchirappalli</option>
-    <option value="Madurai">Madurai</option>
-    <option value="Karaikudi">Karaikudi</option>
-    <option value="Ramanathapuram">Ramanathapuram</option>
-    <option value="Vellore">Vellore</option>
-    <option value="Salem">Salem</option>
-    <option value="Coimbatore">Coimbatore</option>
-    <option value="Krishnagiri">Krishnagiri</option>
-    <option value="Tirunelveli">Tirunelveli</option>
-    <option value="Kanyakumari">Kanyakumari</option>
-    <option value="Hyderabad">Hyderabad</option>
-    <option value="Bengaluru">Bengaluru</option>
-    <option value="Thiruvananthapuram">Thiruvananthapuram</option>
-    <option value="New Delhi">New Delhi</option>
-    <option value="Mumbai">Mumbai</option>
-    <option value="Kolkata">Kolkata</option>
-    <option value="Colombo">Colombo</option>
-    <option value="London">London</option>
-    <option value="New York, NY">New York</option>
-    <option value="Westlake, OH">Westlake</option>
-    <option value="San Francisco, CA">San Francisco</option>
-    <option value="Chicago, IL">Chicago</option>
-    <option value="Houston, TX">Houston</option>
-    <option value="Phoenix, AZ">Phoenix</option>
-    <option value="Dubai">Dubai</option>
-    <option value="Cairo">Cairo</option>
-    <option value="Melbourne">Melbourne</option>
-    <option value="Sydney">Sydney</option>
-    <option value="Riyadh, Saudi Arabia">Saudi Arabia (Riyadh)</option>
+    <optgroup label="South India">
+      <option value="Chennai">Chennai</option>
+      <option value="Tiruchirappalli">Tiruchirappalli</option>
+      <option value="Madurai">Madurai</option>
+      <option value="Karaikudi">Karaikudi</option>
+      <option value="Ramanathapuram">Ramanathapuram</option>
+      <option value="Vellore">Vellore</option>
+      <option value="Salem">Salem</option>
+      <option value="Coimbatore">Coimbatore</option>
+      <option value="Krishnagiri">Krishnagiri</option>
+      <option value="Tirunelveli">Tirunelveli</option>
+      <option value="Kanyakumari">Kanyakumari</option>
+      <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+    </optgroup>
+    <optgroup label="North & Central India">
+      <option value="New Delhi">New Delhi</option>
+      <option value="Mumbai">Mumbai</option>
+      <option value="Kolkata">Kolkata</option>
+      <option value="Hyderabad">Hyderabad</option>
+      <option value="Bengaluru">Bengaluru</option>
+    </optgroup>
+    <optgroup label="North America">
+      <option value="New York, NY">New York</option>
+      <option value="Westlake, OH">Westlake, OH</option>
+      <option value="San Francisco, CA">San Francisco</option>
+      <option value="Chicago, IL">Chicago</option>
+      <option value="Houston, TX">Houston</option>
+      <option value="Phoenix, AZ">Phoenix</option>
+    </optgroup>
+    <optgroup label="Europe & Middle East">
+      <option value="London">London</option>
+      <option value="Dubai">Dubai</option>
+      <option value="Cairo">Cairo</option>
+      <option value="Riyadh, Saudi Arabia">Riyadh</option>
+    </optgroup>
+    <optgroup label="Asia Pacific">
+      <option value="Colombo">Colombo</option>
+      <option value="Melbourne">Melbourne</option>
+      <option value="Sydney">Sydney</option>
+    </optgroup>
   </select>
 </div>
 
@@ -1157,8 +1187,8 @@ function extractTimeData(hour, minutes, cityInfo) {
   <div class="report-header">
     <img src="ganesha.jpg" alt="Ganesha">
     <div class="report-header-text">
-      <p class="report-title">Sri Karpaka Vinayagar Astrology</p>
-      <p class="report-subtitle">by Ravichandran (version 2) <span id="engineLabel" style="font-size:11px; color:#888;"></span></p>
+      <p class="report-title">Sri Karpaka Vinayaka Astrology</p>
+      <p class="report-subtitle">by Ravichandran (Version 1) <span id="engineLabel" style="font-size:11px; color:#888;"></span></p>
     </div>
   </div>
 
