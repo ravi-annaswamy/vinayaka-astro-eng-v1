@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------
-// Swiss Ephemeris integration (uses window.sweInstance when available)
+// Swiss Ephemeris integration (self-hosted WASM, v0.0.5)
 // --------------------------------------------------------------------
 
 /**
@@ -126,61 +126,18 @@ function calculateNavamsaPosition(longitude) {
 }
 
 /**
- * Calculate planetary positions given the time t, timeData, and city info.
- * @param {number} t - (Possibly) Julian day or other time factor.
+ * Calculate planetary positions using Swiss Ephemeris (required).
+ * @param {number} t - Julian centuries from J2000.
  * @param {Object} timeData - Contains .time etc.
  * @param {Object} cityInfo - Contains lat/lon/timezone data.
  * @returns {Array} Planetary positions array with name, nakshatraPada, etc.
  */
 function calculatePlanetaryPositions(t, timeData, cityInfo) {
-  // Use Swiss Ephemeris when available (more accurate)
-  if (window.sweInstance) {
-    return calculatePlanetaryPositionsSwe(t, cityInfo);
+  if (!window.sweInstance) {
+    console.warn('Swiss Ephemeris not yet loaded, skipping calculation');
+    return [];
   }
-
-  // --- Fall back to built-in VSOP engine ---
-  let lon = parseFloat(cityInfo.longitude.degrees) + parseFloat(cityInfo.longitude.minutes / 60);
-  if (cityInfo.longitude.direction === 'E') {
-    lon *= -1;
-  }
-  let lat = parseFloat(cityInfo.latitude.degrees) + parseFloat(cityInfo.latitude.minutes / 60);
-  if (cityInfo.latitude.direction === 'S') {
-    lat *= -1;
-  }
-
-  let as = ascendant(t, timeData.time, lon, lat);
-  let pp = new Array(10);
-  pp[0] = as;
-
-  planets(t, pp, 1);
-
-  let signIndices = chPlanets(pp);
-  let planetaryPositions = [];
-  let planetNames = ['Ascendant', 'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
-
-  for (let i = 0; i < planetNames.length; i++) {
-    let longitude = (pp[i] !== undefined && !isNaN(pp[i])) ? pp[i].toFixed(1) : 'N/A';
-    let degreeInSign = (pp[i] !== undefined && !isNaN(pp[i])) ? (pp[i] % 30).toFixed(1) : 'N/A';
-    let zodiacSign = signIndices[i] ? indianZodiacTamil[signIndices[i] - 1] : 'N/A';
-    let nakshatraPada = (pp[i] !== undefined && !isNaN(pp[i]))
-      ? calculateNakshatraPada(pp[i])
-      : { nakshatra: 'N/A', pada: 'N/A' };
-    let nakshatraIndex = Math.floor(pp[i] / 13.33);
-    let nakshatraLord = nakshatraLordsTamil[nakshatraIndex % 27];
-    let houseNumber = (signIndices[i] - signIndices[0] + 12) % 12 + 1;
-
-    planetaryPositions.push({
-      name: planetNames[i],
-      nakshatraPada: nakshatraPada.nakshatra + ' ' + nakshatraPada.pada,
-      zodiacSign: zodiacSign,
-      degree: degreeInSign,
-      longitude: parseFloat(longitude),
-      nakshatraLord: nakshatraLord,
-      houseNumber: houseNumber
-    });
-  }
-
-  return planetaryPositions;
+  return calculatePlanetaryPositionsSwe(t, cityInfo);
 }
 
 /**

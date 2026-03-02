@@ -12,28 +12,25 @@
   <script src="js/sunrise.js"></script>
   <script src="js/dignity_and_table.js"></script>
   <script src="js/dashas.js"></script>
-  <script src="js/date_utils.js"></script>
+  <script src="js/date_utils.js?v=2"></script>
   <script src="js/panchanga.js"></script>
-  <script src="js/planets.js"></script>
-  <script src="js/planterms2.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-  <!-- Swiss Ephemeris WASM (async module, falls back to built-in engine if unavailable) -->
+  <!-- Swiss Ephemeris WASM (self-hosted, v0.0.5) -->
   <script type="module">
-    import SwissEph from 'https://cdn.jsdelivr.net/npm/swisseph-wasm@latest/src/swisseph.js';
+    import SwissEph from './lib/swisseph-wasm/src/swisseph.js';
     try {
       const swe = new SwissEph();
       await swe.initSwissEph();
       swe.set_sid_mode(swe.SE_SIDM_LAHIRI, 0, 0);
       window.sweInstance = swe;
-      console.log('Swiss Ephemeris loaded (Lahiri ayanamsa)');
-      // Re-render with higher-accuracy engine
+      console.log('Swiss Ephemeris loaded (Lahiri ayanamsa, self-hosted v0.0.5)');
       if (typeof calculatePositions === 'function') {
         calculatePositions();
       }
     } catch (err) {
-      console.warn('Swiss Ephemeris unavailable, using built-in engine:', err);
+      console.error('Swiss Ephemeris failed to load:', err);
     }
   </script>
   
@@ -699,13 +696,16 @@ function calculatePositions() {
   const timeData = extractTimeData(hour, minutes, cityInfo);
   const dateData = calculateDateData(year, month, day, timeData.time);
 
-  // 3. Calculate planetary positions for birth moment
+  // 3. Calculate planetary positions for birth moment (requires Swiss Ephemeris)
   const planetaryPositions = calculatePlanetaryPositions(dateData.t, timeData, cityInfo);
+  if (!planetaryPositions || planetaryPositions.length === 0) {
+    return; // Swiss Eph not yet loaded; it will re-trigger when ready
+  }
 
-  // Show which engine is active
+  // Show engine label
   const engineLabel = document.getElementById('engineLabel');
   if (engineLabel) {
-    engineLabel.textContent = window.sweInstance ? '| Swiss Ephemeris' : '| Built-in Engine';
+    engineLabel.textContent = '| Swiss Ephemeris';
   }
 
   // 4. Add Maanti position

@@ -1,4 +1,22 @@
 
+// J2000 epoch (Julian Day for 2000-01-01 12:00 TT)
+var J2000 = 2451545.0;
+
+/**
+ * Convert calendar date to Julian Day Number.
+ * Uses the standard astronomical algorithm.
+ * @param {number} m - Month (1-12)
+ * @param {number} d - Day (1-31)
+ * @param {number} y - Year
+ * @returns {number} Julian Day Number (integer, noon)
+ */
+function date2jul(m, d, y) {
+  if (m <= 2) { y -= 1; m += 12; }
+  var A = Math.floor(y / 100);
+  var B = 2 - A + Math.floor(A / 4);
+  return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524;
+}
+
 /**
  * Format hour/minute into a 12-hour AM/PM string.
  * @param {number} hour - 0..23
