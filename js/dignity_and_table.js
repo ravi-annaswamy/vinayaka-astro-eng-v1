@@ -51,6 +51,43 @@ const planetDignities = {
 };
 
 /**
+ * Combustion orbs (degrees) for each planet.
+ * A planet is combust when within this angular distance of the Sun.
+ */
+const COMBUSTION_ORBS = {
+  'Moon':    { normal: 12, retrograde: 12 },
+  'Mars':    { normal: 17, retrograde: 17 },
+  'Mercury': { normal: 14, retrograde: 12 },
+  'Jupiter': { normal: 11, retrograde: 11 },
+  'Venus':   { normal: 10, retrograde: 8 },
+  'Saturn':  { normal: 15, retrograde: 15 },
+};
+
+/**
+ * Check if a planet is combust (too close to the Sun).
+ */
+function isCombust(planetName, planetLongitude, sunLongitude, isRetro) {
+  const orbs = COMBUSTION_ORBS[planetName];
+  if (!orbs) return false;
+  let dist = Math.abs(planetLongitude - sunLongitude);
+  if (dist > 180) dist = 360 - dist;
+  return dist < (isRetro ? orbs.retrograde : orbs.normal);
+}
+
+/**
+ * Build display name with status abbreviations appended.
+ * e.g. "Sun Exa.", "Mars (R) Deb.", "Venus Comb."
+ */
+function buildPlanetDisplayName(planetName, isRetro, dignity, combust) {
+  let display = planetName;
+  if (isRetro) display += ' (R)';
+  const abbrevMap = { 'Own Sign': 'Own.', 'Exalted': 'Exa.', 'Debilitated': 'Deb.' };
+  if (abbrevMap[dignity]) display += ' ' + abbrevMap[dignity];
+  if (combust) display += ' Comb.';
+  return display;
+}
+
+/**
  * Returns a dignity string ("Own Sign", "Exalted", "Debilitated", or "-") for the
  * given planetName in the given signIndex (1..12).
  */
@@ -75,12 +112,16 @@ function displayPlanetaryTable(planetaryPositions, planetaryPositionsLater) {
   planetaryPositions.sort((a, b) => a.houseNumber - b.houseNumber || a.longitude - b.longitude);
   planetaryPositionsLater.sort((a, b) => a.houseNumber - b.houseNumber || a.longitude - b.longitude);
 
+  // Find Sun's longitude for combustion check
+  const sunPlanet = planetaryPositions.find(p => p.name === 'Sun');
+  const sunLongitude = sunPlanet ? sunPlanet.longitude : null;
+
   let table = `
     <table>
       <tr>
         <th>House</th>
         <th>Planet</th>
-        <th>Dignity</th>
+        <th>Rashi</th>
         <th>Nakshatra <br> Pada</th>
         <th>Nakshatra <br>Lord</th>
       </tr>
@@ -88,23 +129,23 @@ function displayPlanetaryTable(planetaryPositions, planetaryPositionsLater) {
 
   planetaryPositions.forEach((planet) => {
     const planetLater = planetaryPositionsLater.find(p => p.name === planet.name);
-    let retroSymbol = '';
+    let isRetro = false;
 
     if (planet.name !== 'Rahu' && planet.name !== 'Ketu' &&
         planet.name !== 'Ascendant' && planet.name !== 'Maandi' && planetLater) {
-      if (isRetrograde(planet.longitude, planetLater.longitude)) {
-        retroSymbol = '(R)';
-      }
+      isRetro = isRetrograde(planet.longitude, planetLater.longitude);
     }
 
     let signIndex = signNameToIndex(planet.zodiacSign);
     let dignity = getDignity(planet.name, signIndex);
+    let combust = (sunLongitude !== null) ? isCombust(planet.name, planet.longitude, sunLongitude, isRetro) : false;
+    let displayName = buildPlanetDisplayName(planet.name, isRetro, dignity, combust);
 
     table += `
       <tr>
         <td>${planet.houseNumber}</td>
-        <td>${planet.name} ${retroSymbol}</td>
-        <td>${dignity}</td>
+        <td>${displayName}</td>
+        <td>${planet.zodiacSign}</td>
         <td>${planet.nakshatraPada}</td>
         <td>${planet.nakshatraLord}</td>
       </tr>

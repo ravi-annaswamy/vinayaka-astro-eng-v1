@@ -78,3 +78,36 @@
 ### User Prompt:
 > Dont make code changes, but let me know if it makes sense to switch planet position calculation to Swiss Ephemeris engine.
 > please go ahead and do it
+
+---
+
+## 2026-03-01 20:00 - North Indian Diamond Chart Toggle + Planets Table Update
+
+**Task**: Add a toggle to display charts in North Indian (diamond) style, and update the planets table to show Rashi names and inline status abbreviations.
+
+### Changes Made (3 files):
+
+| File | Changes |
+|------|---------|
+| `js/charts.js` | Added `drawNorthChart()` (~100 lines) — draws North Indian diamond Rasi chart with SVG polygons, diagonal lines, sign number labels, and planet placement. Added `drawNorthNavamsaChart()` (~80 lines) — same diamond layout for Navamsa. Modified `displayChart()` and `displayNavamsaChart()` to branch on `currentChartStyle` toggle state. |
+| `js/dignity_and_table.js` | Added `COMBUSTION_ORBS` constant with standard Vedic combustion degree orbs per planet. Added `isCombust()` function for combustion detection. Added `buildPlanetDisplayName()` helper to combine planet name with status abbreviations (R, Exa., Deb., Own., Comb.). Rewrote `displayPlanetaryTable()` to add Rashi column, remove Dignity column, and use inline status labels. |
+| `index.html` | Added "South Indian / North Indian" segmented toggle buttons with CSS. Added `currentChartStyle` global variable with `localStorage` persistence. Added `setChartStyle()` function to switch styles and re-render. Added print CSS rule to hide toggle. |
+
+### North Indian Chart Geometry:
+- Outer square + two diagonals (corner to corner) + diamond (connecting midpoints of sides)
+- Creates 12 house regions: 4 diamond quadrilaterals (houses 1,4,7,10) + 8 corner triangles
+- House positions are FIXED; signs rotate based on ascendant
+- Sign numbers (1-12) shown as small labels near outer edge of each house
+- Same house coloring scheme: lagna (cyan), kendras (light blue), trikonas (light green)
+- Dynamic row height for crowded triangle houses (up to 8 planets)
+
+### Planets Table Changes:
+- **Before**: House | Planet | Dignity | Nakshatra Pada | Nakshatra Lord
+- **After**: House | Planet | Rashi | Nakshatra Pada | Nakshatra Lord
+- Planet column now shows inline status: `Mars (R) Deb.`, `Mercury Comb.`, `Moon Own.`, etc.
+- Combustion orbs: Moon 12°, Mars 17°, Mercury 14° (12° retro), Jupiter 11°, Venus 10° (8° retro), Saturn 15°
+
+### User Prompt:
+> I would like to make a few changes: Add option to show North Indian Style charts (toggle).
+> One of the example layouts is here for that 'diamond chart'.
+> Secondly update the planets table to include a column right after the planet names to show the rashi names Mesha etc. To save real estate, you can drop the planet status column and add (Own., Deb. Exa. Comb. Retro.) to the planet name.

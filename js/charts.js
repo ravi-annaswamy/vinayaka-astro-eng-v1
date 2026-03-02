@@ -123,6 +123,233 @@ function drawSouthChart(x, y, w, h, planetDetails, currentDate, currentTime, cur
 
 
 /**
+ * Draws a North Indian (diamond) Rasi chart in SVG.
+ * House positions are FIXED; signs rotate based on ascendant.
+ */
+function drawNorthChart(x, y, w, h, planetDetails, currentDate, currentTime, currentCity) {
+  let s = '<g>\n';
+
+  const glyphMapping = {
+    'Ascendant': 'Lag', 'Sun': 'Sun', 'Moon': 'Moo', 'Mars': 'Mar',
+    'Mercury': 'Mer', 'Jupiter': 'Jup', 'Venus': 'Ven', 'Saturn': 'Sat',
+    'Rahu': 'Rah', 'Ketu': 'Ket', 'Maandi': 'Maa',
+  };
+
+  // Key geometry points
+  const TL = [x, y], TR = [x + w, y], BR = [x + w, y + h], BL = [x, y + h];
+  const T = [x + w / 2, y], R = [x + w, y + h / 2], B = [x + w / 2, y + h], L = [x, y + h / 2];
+  const C = [x + w / 2, y + h / 2];
+  const P1 = [x + w / 4, y + h / 4], P2 = [x + 3 * w / 4, y + h / 4];
+  const P3 = [x + 3 * w / 4, y + 3 * h / 4], P4 = [x + w / 4, y + 3 * h / 4];
+
+  // 12 house polygons (0-indexed: house 1 = index 0)
+  const houses = [
+    [T, P2, C, P1],   [T, TR, P2],     [TR, R, P2],     [P2, R, P3, C],
+    [R, BR, P3],       [BR, B, P3],     [P3, B, P4, C],  [BL, B, P4],
+    [L, BL, P4],       [P4, L, P1, C],  [TL, P1, L],     [TL, T, P1],
+  ];
+
+  // Find ascendant sign index (0-11)
+  const ascPlanet = planetDetails.find(p => p.name === 'Ascendant');
+  const ascSignIndex = (ascPlanet && !isNaN(ascPlanet.longitude))
+    ? Math.floor((ascPlanet.longitude % 360) / 30) : 0;
+
+  // Draw house fills (lagna, kendra, trikona highlighting)
+  houses.forEach((verts, i) => {
+    let fill = 'none';
+    if (i === 0) fill = '#bbeeee';
+    else if (i === 3 || i === 6 || i === 9) fill = '#e0f7fa';
+    else if (i === 4 || i === 8) fill = '#e8f6e9';
+    const points = verts.map(v => v.join(',')).join(' ');
+    s += `<polygon points="${points}" style="fill:${fill};stroke:none"/>\n`;
+  });
+
+  // Draw structural lines: outer square
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" style="fill:none;stroke:black;stroke-width:2"/>\n`;
+  // Diamond edges (midpoint to midpoint)
+  [[T, R], [R, B], [B, L], [L, T]].forEach(([a, b]) => {
+    s += `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="black" stroke-width="1"/>\n`;
+  });
+  // Diagonals (corner to corner)
+  [[TL, BR], [TR, BL]].forEach(([a, b]) => {
+    s += `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="black" stroke-width="1"/>\n`;
+  });
+
+  // Group planets by house
+  let housePlanets = Array.from({ length: 12 }, () => []);
+  planetDetails.forEach(planet => {
+    const signIdx = Math.floor((planet.longitude % 360) / 30);
+    const houseIdx = ((signIdx - ascSignIndex) + 12) % 12;
+    const glyph = glyphMapping[planet.name] || planet.name;
+    const degree = Math.ceil(planet.longitude % 30);
+    housePlanets[houseIdx].push({ glyph, degree });
+  });
+  housePlanets.forEach(hp => hp.sort((a, b) => a.degree - b.degree));
+
+  // Centroid helper
+  function centroid(verts) {
+    const n = verts.length;
+    return [
+      verts.reduce((sum, v) => sum + v[0], 0) / n,
+      verts.reduce((sum, v) => sum + v[1], 0) / n
+    ];
+  }
+
+  // Sign label positions (near outer edge of each house)
+  const signLabelPos = [
+    [C[0], T[1] + 16],           // H1: near top
+    [TR[0] - 30, T[1] + 14],     // H2: near top-right
+    [TR[0] - 14, R[1] - 40],     // H3: near right upper
+    [R[0] - 16, C[1]],           // H4: near right
+    [BR[0] - 14, R[1] + 44],     // H5: near right lower
+    [BR[0] - 30, B[1] - 14],     // H6: near bottom-right
+    [C[0], B[1] - 12],           // H7: near bottom
+    [BL[0] + 30, B[1] - 14],     // H8: near bottom-left
+    [L[0] + 14, L[1] + 44],      // H9: near left lower
+    [L[0] + 16, C[1]],           // H10: near left
+    [TL[0] + 14, L[1] - 40],     // H11: near left upper
+    [TL[0] + 30, T[1] + 14],     // H12: near top-left
+  ];
+
+  // Draw sign number labels
+  for (let i = 0; i < 12; i++) {
+    const signNum = ((ascSignIndex + i) % 12) + 1;
+    const [lx, ly] = signLabelPos[i];
+    s += `<text x="${lx}" y="${ly}" fill="#999" font-size="12" font-family="monospace" text-anchor="middle" dominant-baseline="middle">${signNum}</text>\n`;
+  }
+
+  // Draw planets in each house
+  for (let i = 0; i < 12; i++) {
+    const planets = housePlanets[i];
+    if (planets.length === 0) continue;
+    const ctr = centroid(houses[i]);
+    const isDiamond = (i === 0 || i === 3 || i === 6 || i === 9);
+    // Dynamic row height: triangle houses get tighter spacing when crowded
+    const maxHeight = isDiamond ? 80 : 65;
+    const rh = Math.min(18, maxHeight / planets.length);
+    const fontSize = isDiamond ? 16 : (planets.length > 3 ? 12 : 14);
+    const spread = isDiamond ? 22 : 16;
+    const totalHeight = planets.length * rh;
+    const startY = ctr[1] - totalHeight / 2 + rh / 2;
+
+    for (let j = 0; j < planets.length; j++) {
+      const py = startY + j * rh;
+      s += `<text x="${ctr[0] - spread}" y="${py}" fill="black" font-size="${fontSize}" font-family="monospace" text-anchor="middle" dominant-baseline="middle">${planets[j].glyph}</text>\n`;
+      s += `<text x="${ctr[0] + spread}" y="${py}" fill="black" font-size="${fontSize - 2}" font-family="monospace" text-anchor="middle" dominant-baseline="middle">${planets[j].degree}°</text>\n`;
+    }
+  }
+
+  // Center text with white background for readability
+  s += `<rect x="${C[0] - 62}" y="${C[1] - 30}" width="124" height="60" fill="white" fill-opacity="0.85" stroke="none" rx="3"/>\n`;
+  s += `<text x="${C[0]}" y="${C[1] - 16}" fill="black" font-size="9" font-family="monospace" text-anchor="middle">Sri Karpaka Vinayagar</text>\n`;
+  s += `<text x="${C[0]}" y="${C[1]}" fill="blue" font-size="13" font-family="monospace" font-weight="bold" text-anchor="middle">Rasi</text>\n`;
+  s += `<text x="${C[0]}" y="${C[1] + 14}" fill="black" font-size="11" font-family="monospace" text-anchor="middle">${currentDate} ${currentTime}</text>\n`;
+  s += `<text x="${C[0]}" y="${C[1] + 26}" fill="black" font-size="10" font-family="monospace" text-anchor="middle">${currentCity}</text>\n`;
+  s += '</g>\n';
+  return s;
+}
+
+/**
+ * Draws a North Indian (diamond) Navamsa chart in SVG.
+ */
+function drawNorthNavamsaChart(x, y, w, h, planetDetails) {
+  let s = '<g>\n';
+
+  const glyphMapping = {
+    'Ascendant': 'Lag', 'Sun': 'Sun', 'Moon': 'Moo', 'Mars': 'Mar',
+    'Mercury': 'Mer', 'Jupiter': 'Jup', 'Venus': 'Ven', 'Saturn': 'Sat',
+    'Rahu': 'Rah', 'Ketu': 'Ket', 'Maandi': 'Maa',
+  };
+
+  // Key geometry points (same as Rasi North chart)
+  const TL = [x, y], TR = [x + w, y], BR = [x + w, y + h], BL = [x, y + h];
+  const T = [x + w / 2, y], R = [x + w, y + h / 2], B = [x + w / 2, y + h], L = [x, y + h / 2];
+  const C = [x + w / 2, y + h / 2];
+  const P1 = [x + w / 4, y + h / 4], P2 = [x + 3 * w / 4, y + h / 4];
+  const P3 = [x + 3 * w / 4, y + 3 * h / 4], P4 = [x + w / 4, y + 3 * h / 4];
+
+  const houses = [
+    [T, P2, C, P1],   [T, TR, P2],     [TR, R, P2],     [P2, R, P3, C],
+    [R, BR, P3],       [BR, B, P3],     [P3, B, P4, C],  [BL, B, P4],
+    [L, BL, P4],       [P4, L, P1, C],  [TL, P1, L],     [TL, T, P1],
+  ];
+
+  // Find navamsa ascendant sign
+  const ascPlanet = planetDetails.find(p => p.name === 'Ascendant');
+  const navAscSign = ascPlanet ? calculateNavamsaPosition(ascPlanet.longitude) : 0;
+
+  // Draw structural lines: outer square
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" style="fill:none;stroke:black;stroke-width:2"/>\n`;
+  [[T, R], [R, B], [B, L], [L, T]].forEach(([a, b]) => {
+    s += `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="black" stroke-width="1"/>\n`;
+  });
+  [[TL, BR], [TR, BL]].forEach(([a, b]) => {
+    s += `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="black" stroke-width="1"/>\n`;
+  });
+
+  // Group planets by navamsa house
+  let housePlanets = Array.from({ length: 12 }, () => []);
+  planetDetails.forEach(planet => {
+    const navSign = calculateNavamsaPosition(planet.longitude);
+    const houseIdx = ((navSign - navAscSign) + 12) % 12;
+    const glyph = glyphMapping[planet.name] || planet.name;
+    housePlanets[houseIdx].push(glyph);
+  });
+
+  function centroid(verts) {
+    const n = verts.length;
+    return [
+      verts.reduce((sum, v) => sum + v[0], 0) / n,
+      verts.reduce((sum, v) => sum + v[1], 0) / n
+    ];
+  }
+
+  // Sign label positions (same layout as Rasi)
+  const signLabelPos = [
+    [C[0], T[1] + 16],           [TR[0] - 30, T[1] + 14],
+    [TR[0] - 14, R[1] - 40],     [R[0] - 16, C[1]],
+    [BR[0] - 14, R[1] + 44],     [BR[0] - 30, B[1] - 14],
+    [C[0], B[1] - 12],           [BL[0] + 30, B[1] - 14],
+    [L[0] + 14, L[1] + 44],      [L[0] + 16, C[1]],
+    [TL[0] + 14, L[1] - 40],     [TL[0] + 30, T[1] + 14],
+  ];
+
+  for (let i = 0; i < 12; i++) {
+    const signNum = ((navAscSign + i) % 12) + 1;
+    const [lx, ly] = signLabelPos[i];
+    s += `<text x="${lx}" y="${ly}" fill="#999" font-size="12" font-family="monospace" text-anchor="middle" dominant-baseline="middle">${signNum}</text>\n`;
+  }
+
+  // Draw planets (glyphs only, no degrees) in two-column layout
+  const rowHeight = 20;
+  for (let i = 0; i < 12; i++) {
+    const glyphs = housePlanets[i];
+    if (glyphs.length === 0) continue;
+    const ctr = centroid(houses[i]);
+    const isDiamond = (i === 0 || i === 3 || i === 6 || i === 9);
+    const fontSize = isDiamond ? 16 : 14;
+    const numRows = Math.ceil(glyphs.length / 2);
+    const totalHeight = numRows * rowHeight;
+    const startY = ctr[1] - totalHeight / 2 + rowHeight / 2;
+    const colSpread = isDiamond ? 28 : 22;
+
+    for (let j = 0; j < glyphs.length; j++) {
+      const row = Math.floor(j / 2);
+      const col = j % 2;
+      const gx = (glyphs.length === 1) ? ctr[0] : ctr[0] + (col === 0 ? -colSpread : colSpread);
+      const gy = startY + row * rowHeight;
+      s += `<text x="${gx}" y="${gy}" fill="black" font-size="${fontSize}" font-family="monospace" text-anchor="middle" dominant-baseline="middle">${glyphs[j]}</text>\n`;
+    }
+  }
+
+  // Center label
+  s += `<rect x="${C[0] - 40}" y="${C[1] - 10}" width="80" height="20" fill="white" fill-opacity="0.85" stroke="none" rx="3"/>\n`;
+  s += `<text x="${C[0]}" y="${C[1] + 2}" fill="blue" font-size="14" font-family="monospace" font-weight="bold" text-anchor="middle">Navamsa</text>\n`;
+  s += '</g>\n';
+  return s;
+}
+
+/**
  * Draws the Navamsa chart (in SVG).
  * @param {number} x - Top-left x offset.
  * @param {number} y - Top-left y offset.
@@ -207,10 +434,14 @@ function displayChart(planetaryPositions, year, month, day, hour, minutes) {
   let currentDate = day + '-' + month + '-' + year;
   let currentTime = formatAMPM(hour, minutes);
   let selectedCity = document.getElementById('city').value;
-  let currentCity = selectedCity; // use English city name
+  let currentCity = selectedCity;
 
-  // Keep a small inset margin so outer strokes do not get clipped on right/bottom edges.
-  let svgContent = drawSouthChart(4, 4, 392, 392, planetaryPositions, currentDate, currentTime, currentCity);
+  let svgContent;
+  if (typeof currentChartStyle !== 'undefined' && currentChartStyle === 'north') {
+    svgContent = drawNorthChart(4, 4, 392, 392, planetaryPositions, currentDate, currentTime, currentCity);
+  } else {
+    svgContent = drawSouthChart(4, 4, 392, 392, planetaryPositions, currentDate, currentTime, currentCity);
+  }
   document.getElementById('chartContainer').innerHTML =
     '<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" version="1.1">' +
     svgContent + '</svg>';
@@ -223,8 +454,12 @@ function displayChart(planetaryPositions, year, month, day, hour, minutes) {
 function displayNavamsaChart(navamsaPositions) {
   navamsaPositions.sort((a, b) => a.longitude - b.longitude);
 
-  // Keep a small inset margin so outer strokes do not get clipped on right/bottom edges.
-  let navamsaSvgContent = drawNavamsaChart(4, 4, 392, 392, navamsaPositions);
+  let navamsaSvgContent;
+  if (typeof currentChartStyle !== 'undefined' && currentChartStyle === 'north') {
+    navamsaSvgContent = drawNorthNavamsaChart(4, 4, 392, 392, navamsaPositions);
+  } else {
+    navamsaSvgContent = drawNavamsaChart(4, 4, 392, 392, navamsaPositions);
+  }
   document.getElementById('navamsaChartContainer').innerHTML =
     '<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" version="1.1">' +
     navamsaSvgContent + '</svg>';
