@@ -69,10 +69,9 @@ function calculatePlanetaryPositionsSwe(t, cityInfo) {
   let planetNames = ['Ascendant', 'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
 
   for (let i = 0; i < planetNames.length; i++) {
-    let longitude = pp[i].toFixed(1);
     let zodiacSign = signIndices[i] ? indianZodiacTamil[signIndices[i] - 1] : 'N/A';
     let nakshatraPada = calculateNakshatraPada(pp[i]);
-    let nakshatraIndex = Math.floor(pp[i] / 13.33);
+    let nakshatraIndex = Math.floor(pp[i] / (40 / 3));
     let nakshatraLord = nakshatraLordsTamil[nakshatraIndex % 27];
     let houseNumber = (signIndices[i] - signIndices[0] + 12) % 12 + 1;
 
@@ -81,7 +80,7 @@ function calculatePlanetaryPositionsSwe(t, cityInfo) {
       nakshatraPada: nakshatraPada.nakshatra + ' ' + nakshatraPada.pada,
       zodiacSign: zodiacSign,
       degree: (pp[i] % 30).toFixed(1),
-      longitude: parseFloat(longitude),
+      longitude: pp[i],
       nakshatraLord: nakshatraLord,
       houseNumber: houseNumber
     });

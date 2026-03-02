@@ -131,3 +131,40 @@
 
 ### User Prompt:
 > I would like to reduce clutter on the chart by removing the birth details inside the chart, just have Rasi and Navamsha both in south and north charts. Secondly, try to put planet status in brackets such as (Comb.)(Retr,)(Exal.)(Debi) (Own.) and if a planet has two status, put them with comma separation in same brackets.
+
+---
+
+## 2026-03-02 02:00 - Critical JD Calculation Bug Fix
+
+**Task**: Fix nakshatra pada and dasha errors reported by user.
+
+### Root Cause
+The `calculateDateData()` function in `index.html` had `date2jul(month, day, year) + 0.5` which should have been `- 0.5`. The `date2jul()` function returns the Julian Day Number (JDN), which corresponds to **noon UT**. To get midnight UT (start of civil day), you subtract 0.5. The `+ 0.5` was pushing to midnight of the **next day**, making all planetary positions 1 full day off.
+
+Similarly, `getSystemJD()` in `date_utils.js` was missing the `-0.5` adjustment, making the "today" marker 0.5 days off.
+
+### Impact
+- **Moon position**: Off by ~13° (one full nakshatra). Example: Mar 1, 2026 9AM Chennai showed Moon in Magha (120.6°) instead of correct Ashlesha (106.9°).
+- **Natal dasha lord**: Ketu instead of correct Mercury.
+- **All planet positions**: Shifted by 1 day's motion (negligible for slow planets like Saturn, significant for Moon and Ascendant).
+- **Dasha balance**: Incorrect because based on wrong Moon position.
+
+### Fixes Applied (4 files):
+
+| File | Fix |
+|------|-----|
+| `index.html` (line 1054) | `date2jul(...) + 0.5` → `date2jul(...) - 0.5` — fixes birth chart JD by 1 day |
+| `js/date_utils.js` (line 71) | Added `- 0.5` in `getSystemJD()` — fixes "today" JD by 0.5 days |
+| `js/astro_calc.js` (line 75) | `13.33` → `40/3` — fixes nakshatra lord precision at boundaries (13.33 ≠ 360/27) |
+| `js/astro_calc.js` (line 72) | `parseFloat(pp[i].toFixed(1))` → `pp[i]` — stores full-precision longitude for dasha accuracy |
+| `js/charts.js` (lines 44, 180) | `Math.ceil` → `Math.floor` for chart degree display (prevents "30°" showing at sign boundary) |
+| `index.html` (script tags) | Bumped all cache busters to `?v=3`/`?v=4` |
+
+### Verification
+- **JD check**: `calculateDateData(2026,3,1,3.5)` → JD 2461100.6458 (correct, was 2461101.6458)
+- **Makara Sankranti**: Jan 14, 2026 noon Chennai → Sun at 29.9° Dhanus (about to enter Makara) ✓
+- **`getSystemJD`**: Difference from correct value = 0 (was 0.5)
+- **Moon**: Correctly shows Kataka/Ashlesha/Mercury instead of wrong Simha/Magha/Ketu
+
+### User Prompt
+> I see error in nakshatra pada and dasha

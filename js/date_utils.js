@@ -68,6 +68,6 @@ function getSystemJD() {
   let hour = now.getUTCHours();
   let min = now.getUTCMinutes();
 
-  let jd = date2jul(m, d, y) + (hour + min / 60) / 24.0; // date2jul presumably external
+  let jd = date2jul(m, d, y) - 0.5 + (hour + min / 60) / 24.0;
   return jd;
 }

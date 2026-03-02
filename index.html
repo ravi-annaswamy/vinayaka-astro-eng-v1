@@ -5,15 +5,15 @@
   <title>Vinayaka Astro</title>
   
   <!-- Include scripts -->
-  <script src="js/constants.js"></script>
-  <script src="js/astro_calc.js"></script>
-  <script src="js/charts.js"></script>
-  <script src="js/cities.js?v=20260212-2"></script>
-  <script src="js/sunrise.js"></script>
-  <script src="js/dignity_and_table.js"></script>
-  <script src="js/dashas.js"></script>
-  <script src="js/date_utils.js?v=2"></script>
-  <script src="js/panchanga.js"></script>
+  <script src="js/constants.js?v=3"></script>
+  <script src="js/astro_calc.js?v=3"></script>
+  <script src="js/charts.js?v=4"></script>
+  <script src="js/cities.js?v=3"></script>
+  <script src="js/sunrise.js?v=3"></script>
+  <script src="js/dignity_and_table.js?v=3"></script>
+  <script src="js/dashas.js?v=3"></script>
+  <script src="js/date_utils.js?v=3"></script>
+  <script src="js/panchanga.js?v=3"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
@@ -1051,7 +1051,7 @@ function extractTimeData(hour, minutes, cityInfo) {
 
     // Calculate Julian date/time factor
     function calculateDateData(year, month, day, time) {
-      var jd = date2jul(month, day, year) + 0.5;
+      var jd = date2jul(month, day, year) - 0.5;
       jd += time / 24.0;
       var t = (jd - J2000) / 36525.0;
       return { jd: jd, t: t };

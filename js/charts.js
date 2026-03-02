@@ -41,7 +41,7 @@ function drawSouthChart(x, y, w, h, planetDetails, currentDate, currentTime, cur
   planetDetails.forEach((planet) => {
     const houseIndex = Math.floor((planet.longitude % 360) / 30);
     const glyph = glyphMapping[planet.name] || planet.name;
-    const degree = Math.ceil(planet.longitude % 30); // Round up to whole number
+    const degree = Math.floor(planet.longitude % 30);
     housePlanets[houseIndex].push({ glyph, degree });
   });
 
@@ -177,7 +177,7 @@ function drawNorthChart(x, y, w, h, planetDetails, currentDate, currentTime, cur
     const signIdx = Math.floor((planet.longitude % 360) / 30);
     const houseIdx = ((signIdx - ascSignIndex) + 12) % 12;
     const glyph = glyphMapping[planet.name] || planet.name;
-    const degree = Math.ceil(planet.longitude % 30);
+    const degree = Math.floor(planet.longitude % 30);
     housePlanets[houseIdx].push({ glyph, degree });
   });
   housePlanets.forEach(hp => hp.sort((a, b) => a.degree - b.degree));
