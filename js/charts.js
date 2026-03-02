@@ -109,11 +109,7 @@ function drawSouthChart(x, y, w, h, planetDetails, currentDate, currentTime, cur
 
   const centerX = x + w / 2;
   const centerY = y + h / 2;
-  s += `<text x="${centerX}" y="${centerY - 20}" fill="black" font-size="11" font-family="monospace" text-anchor="middle">Sri Karpaka Vinayagar</text>\n`;
   s += `<text x="${centerX}" y="${centerY}" fill="blue" font-size="15" font-family="monospace" font-weight="bold" text-anchor="middle">Rasi</text>\n`;
-  s += `<text x="${centerX}" y="${centerY + 20}" fill="black" font-size="16" font-family="monospace" text-anchor="middle">${currentDate}</text>\n`;
-  s += `<text x="${centerX}" y="${centerY + 40}" fill="black" font-size="16" font-family="monospace" text-anchor="middle">${currentTime}</text>\n`;
-  s += `<text x="${centerX}" y="${centerY + 60}" fill="black" font-size="14" font-family="monospace" text-anchor="middle">${currentCity}</text>\n`;
   s += '</g>\n';
 
   return s;
@@ -239,12 +235,9 @@ function drawNorthChart(x, y, w, h, planetDetails, currentDate, currentTime, cur
     }
   }
 
-  // Center text with white background for readability
-  s += `<rect x="${C[0] - 62}" y="${C[1] - 30}" width="124" height="60" fill="white" fill-opacity="0.85" stroke="none" rx="3"/>\n`;
-  s += `<text x="${C[0]}" y="${C[1] - 16}" fill="black" font-size="9" font-family="monospace" text-anchor="middle">Sri Karpaka Vinayagar</text>\n`;
-  s += `<text x="${C[0]}" y="${C[1]}" fill="blue" font-size="13" font-family="monospace" font-weight="bold" text-anchor="middle">Rasi</text>\n`;
-  s += `<text x="${C[0]}" y="${C[1] + 14}" fill="black" font-size="11" font-family="monospace" text-anchor="middle">${currentDate} ${currentTime}</text>\n`;
-  s += `<text x="${C[0]}" y="${C[1] + 26}" fill="black" font-size="10" font-family="monospace" text-anchor="middle">${currentCity}</text>\n`;
+  // Center label with white background for readability
+  s += `<rect x="${C[0] - 26}" y="${C[1] - 10}" width="52" height="20" fill="white" fill-opacity="0.85" stroke="none" rx="3"/>\n`;
+  s += `<text x="${C[0]}" y="${C[1] + 2}" fill="blue" font-size="13" font-family="monospace" font-weight="bold" text-anchor="middle">Rasi</text>\n`;
   s += '</g>\n';
   return s;
 }
@@ -344,7 +337,7 @@ function drawNorthNavamsaChart(x, y, w, h, planetDetails) {
 
   // Center label
   s += `<rect x="${C[0] - 40}" y="${C[1] - 10}" width="80" height="20" fill="white" fill-opacity="0.85" stroke="none" rx="3"/>\n`;
-  s += `<text x="${C[0]}" y="${C[1] + 2}" fill="blue" font-size="14" font-family="monospace" font-weight="bold" text-anchor="middle">Navamsa</text>\n`;
+  s += `<text x="${C[0]}" y="${C[1] + 2}" fill="blue" font-size="14" font-family="monospace" font-weight="bold" text-anchor="middle">Navamsha</text>\n`;
   s += '</g>\n';
   return s;
 }
@@ -422,7 +415,7 @@ function drawNavamsaChart(x, y, w, h, planetDetails) {
   // Center the Navamsa chart label.
   const centerX = x + w / 2;
   const centerY = y + h / 2;
-  s += `<text x="${centerX}" y="${centerY}" fill="blue" font-size="16" font-family="monospace" font-weight="bold" font-color="blue" text-anchor="middle">Navamsa</text>\n`;
+  s += `<text x="${centerX}" y="${centerY}" fill="blue" font-size="16" font-family="monospace" font-weight="bold" font-color="blue" text-anchor="middle">Navamsha</text>\n`;
   s += '</g>\n';
   return s;
 }

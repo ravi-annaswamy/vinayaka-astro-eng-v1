@@ -80,10 +80,12 @@ function isCombust(planetName, planetLongitude, sunLongitude, isRetro) {
  */
 function buildPlanetDisplayName(planetName, isRetro, dignity, combust) {
   let display = planetName;
-  if (isRetro) display += ' (R)';
-  const abbrevMap = { 'Own Sign': 'Own.', 'Exalted': 'Exa.', 'Debilitated': 'Deb.' };
-  if (abbrevMap[dignity]) display += ' ' + abbrevMap[dignity];
-  if (combust) display += ' Comb.';
+  const statuses = [];
+  if (isRetro) statuses.push('Retr.');
+  const abbrevMap = { 'Own Sign': 'Own.', 'Exalted': 'Exal.', 'Debilitated': 'Debi.' };
+  if (abbrevMap[dignity]) statuses.push(abbrevMap[dignity]);
+  if (combust) statuses.push('Comb.');
+  if (statuses.length > 0) display += ' (' + statuses.join(', ') + ')';
   return display;
 }
 

@@ -111,3 +111,23 @@
 > I would like to make a few changes: Add option to show North Indian Style charts (toggle).
 > One of the example layouts is here for that 'diamond chart'.
 > Secondly update the planets table to include a column right after the planet names to show the rashi names Mesha etc. To save real estate, you can drop the planet status column and add (Own., Deb. Exa. Comb. Retro.) to the planet name.
+
+---
+
+## 2026-03-01 21:00 - Chart Declutter + Planet Status Bracket Format
+
+**Task**: Remove birth details from chart centers; change planet status display to bracket format with comma separation.
+
+### Changes Made (2 files):
+
+| File | Changes |
+|------|---------|
+| `js/charts.js` | Removed date, time, city, and "Sri Karpaka Vinayagar" text from center of South Indian Rasi chart (kept only "Rasi" label). Removed same from North Indian Rasi chart center, shrunk white background rect to just cover "Rasi" label. Navamsa charts already had only labels — no changes needed. |
+| `js/dignity_and_table.js` | Rewrote `buildPlanetDisplayName()` to collect statuses into an array and wrap in parentheses with comma separation. Changed abbreviations: `Retr.` (was `(R)`), `Exal.` (was `Exa.`), `Debi.` (was `Deb.`), `Own.` (unchanged), `Comb.` (unchanged). |
+
+### Planet Status Format:
+- **Before**: `Mars (R) Deb.`, `Mercury Comb.`, `Moon Own.`
+- **After**: `Mars (Comb.)`, `Mercury (Retr., Comb.)`, `Moon (Own.)`, `Venus (Retr., Debi.)`
+
+### User Prompt:
+> I would like to reduce clutter on the chart by removing the birth details inside the chart, just have Rasi and Navamsha both in south and north charts. Secondly, try to put planet status in brackets such as (Comb.)(Retr,)(Exal.)(Debi) (Own.) and if a planet has two status, put them with comma separation in same brackets.
