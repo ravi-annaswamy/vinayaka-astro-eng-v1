@@ -168,3 +168,39 @@ Similarly, `getSystemJD()` in `date_utils.js` was missing the `-0.5` adjustment,
 
 ### User Prompt
 > I see error in nakshatra pada and dasha
+
+---
+
+## 2026-03-02 03:00 - North Indian Chart Counter-Clockwise Fix
+
+**Task**: Fix North Indian kundli house direction from clockwise to counter-clockwise.
+
+### Root Cause
+The `houses` array in both `drawNorthChart()` and `drawNorthNavamsaChart()` defined house positions going clockwise from H1 at the top (H1→H2 upper-right→H3 right-upper→H4 right...). Standard North Indian kundli has houses proceeding **counter-clockwise** (H1→H2 upper-left→H3 left-upper→H4 left...).
+
+### Changes Made (2 files):
+
+| File | Changes |
+|------|---------|
+| `js/charts.js` | Reordered `houses` array in `drawNorthChart()` to go counter-clockwise: H2 upper-left, H3 left-upper, H4 left diamond, H5 left-lower, H6 lower-left, then H8 lower-right, H9 right-lower, H10 right diamond, H11 right-upper, H12 upper-right. Same fix in `drawNorthNavamsaChart()`. Reordered `signLabelPos` arrays in both functions to match. |
+| `index.html` | Bumped charts.js cache buster to `?v=5` |
+
+### House Layout (Counter-Clockwise):
+```
+         H12  |  H1  |  H2
+        ------+------+------
+         H11  | center|  H3
+        ------+------+------
+         H10  |  H7  |  H4
+        ------+------+------
+          H9  |  H8  |  H5/H6
+```
+(Diamond layout: H1/H4/H7/H10 are diamond quadrilaterals, others are triangles)
+
+### Verification
+- Visually confirmed: H1 at top (cyan lagna), houses proceed counter-clockwise
+- Both Rasi and Navamsha North Indian charts corrected
+- Sign number labels correctly positioned near each house
+
+### User Prompt
+> In the north indian kundli the placement of planets is in the anticlockwise, you have made it clockwise.

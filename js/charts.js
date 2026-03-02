@@ -139,10 +139,20 @@ function drawNorthChart(x, y, w, h, planetDetails, currentDate, currentTime, cur
   const P3 = [x + 3 * w / 4, y + 3 * h / 4], P4 = [x + w / 4, y + 3 * h / 4];
 
   // 12 house polygons (0-indexed: house 1 = index 0)
+  // Counter-clockwise: H1 top, H2 upper-left, H3 left-upper, H4 left, ...
   const houses = [
-    [T, P2, C, P1],   [T, TR, P2],     [TR, R, P2],     [P2, R, P3, C],
-    [R, BR, P3],       [BR, B, P3],     [P3, B, P4, C],  [BL, B, P4],
-    [L, BL, P4],       [P4, L, P1, C],  [TL, P1, L],     [TL, T, P1],
+    [T, P2, C, P1],    // H1:  top diamond
+    [TL, T, P1],       // H2:  upper-left triangle
+    [TL, P1, L],       // H3:  left-upper triangle
+    [P4, L, P1, C],    // H4:  left diamond
+    [L, BL, P4],       // H5:  left-lower triangle
+    [BL, B, P4],       // H6:  lower-left triangle
+    [P3, B, P4, C],    // H7:  bottom diamond
+    [BR, B, P3],       // H8:  lower-right triangle
+    [R, BR, P3],       // H9:  right-lower triangle
+    [P2, R, P3, C],    // H10: right diamond
+    [TR, R, P2],       // H11: right-upper triangle
+    [T, TR, P2],       // H12: upper-right triangle
   ];
 
   // Find ascendant sign index (0-11)
@@ -191,20 +201,20 @@ function drawNorthChart(x, y, w, h, planetDetails, currentDate, currentTime, cur
     ];
   }
 
-  // Sign label positions (near outer edge of each house)
+  // Sign label positions (near outer edge of each house, counter-clockwise)
   const signLabelPos = [
-    [C[0], T[1] + 16],           // H1: near top
-    [TR[0] - 30, T[1] + 14],     // H2: near top-right
-    [TR[0] - 14, R[1] - 40],     // H3: near right upper
-    [R[0] - 16, C[1]],           // H4: near right
-    [BR[0] - 14, R[1] + 44],     // H5: near right lower
-    [BR[0] - 30, B[1] - 14],     // H6: near bottom-right
-    [C[0], B[1] - 12],           // H7: near bottom
-    [BL[0] + 30, B[1] - 14],     // H8: near bottom-left
-    [L[0] + 14, L[1] + 44],      // H9: near left lower
-    [L[0] + 16, C[1]],           // H10: near left
-    [TL[0] + 14, L[1] - 40],     // H11: near left upper
-    [TL[0] + 30, T[1] + 14],     // H12: near top-left
+    [C[0], T[1] + 16],           // H1:  near top
+    [TL[0] + 30, T[1] + 14],     // H2:  near top-left
+    [TL[0] + 14, L[1] - 40],     // H3:  near left upper
+    [L[0] + 16, C[1]],           // H4:  near left
+    [L[0] + 14, L[1] + 44],      // H5:  near left lower
+    [BL[0] + 30, B[1] - 14],     // H6:  near bottom-left
+    [C[0], B[1] - 12],           // H7:  near bottom
+    [BR[0] - 30, B[1] - 14],     // H8:  near bottom-right
+    [BR[0] - 14, R[1] + 44],     // H9:  near right lower
+    [R[0] - 16, C[1]],           // H10: near right
+    [TR[0] - 14, R[1] - 40],     // H11: near right upper
+    [TR[0] - 30, T[1] + 14],     // H12: near top-right
   ];
 
   // Draw sign number labels
@@ -261,10 +271,20 @@ function drawNorthNavamsaChart(x, y, w, h, planetDetails) {
   const P1 = [x + w / 4, y + h / 4], P2 = [x + 3 * w / 4, y + h / 4];
   const P3 = [x + 3 * w / 4, y + 3 * h / 4], P4 = [x + w / 4, y + 3 * h / 4];
 
+  // Counter-clockwise: H1 top, H2 upper-left, H3 left-upper, H4 left, ...
   const houses = [
-    [T, P2, C, P1],   [T, TR, P2],     [TR, R, P2],     [P2, R, P3, C],
-    [R, BR, P3],       [BR, B, P3],     [P3, B, P4, C],  [BL, B, P4],
-    [L, BL, P4],       [P4, L, P1, C],  [TL, P1, L],     [TL, T, P1],
+    [T, P2, C, P1],    // H1:  top diamond
+    [TL, T, P1],       // H2:  upper-left triangle
+    [TL, P1, L],       // H3:  left-upper triangle
+    [P4, L, P1, C],    // H4:  left diamond
+    [L, BL, P4],       // H5:  left-lower triangle
+    [BL, B, P4],       // H6:  lower-left triangle
+    [P3, B, P4, C],    // H7:  bottom diamond
+    [BR, B, P3],       // H8:  lower-right triangle
+    [R, BR, P3],       // H9:  right-lower triangle
+    [P2, R, P3, C],    // H10: right diamond
+    [TR, R, P2],       // H11: right-upper triangle
+    [T, TR, P2],       // H12: upper-right triangle
   ];
 
   // Find navamsa ascendant sign
@@ -297,14 +317,20 @@ function drawNorthNavamsaChart(x, y, w, h, planetDetails) {
     ];
   }
 
-  // Sign label positions (same layout as Rasi)
+  // Sign label positions (counter-clockwise, same layout as Rasi)
   const signLabelPos = [
-    [C[0], T[1] + 16],           [TR[0] - 30, T[1] + 14],
-    [TR[0] - 14, R[1] - 40],     [R[0] - 16, C[1]],
-    [BR[0] - 14, R[1] + 44],     [BR[0] - 30, B[1] - 14],
-    [C[0], B[1] - 12],           [BL[0] + 30, B[1] - 14],
-    [L[0] + 14, L[1] + 44],      [L[0] + 16, C[1]],
-    [TL[0] + 14, L[1] - 40],     [TL[0] + 30, T[1] + 14],
+    [C[0], T[1] + 16],           // H1:  near top
+    [TL[0] + 30, T[1] + 14],     // H2:  near top-left
+    [TL[0] + 14, L[1] - 40],     // H3:  near left upper
+    [L[0] + 16, C[1]],           // H4:  near left
+    [L[0] + 14, L[1] + 44],      // H5:  near left lower
+    [BL[0] + 30, B[1] - 14],     // H6:  near bottom-left
+    [C[0], B[1] - 12],           // H7:  near bottom
+    [BR[0] - 30, B[1] - 14],     // H8:  near bottom-right
+    [BR[0] - 14, R[1] + 44],     // H9:  near right lower
+    [R[0] - 16, C[1]],           // H10: near right
+    [TR[0] - 14, R[1] - 40],     // H11: near right upper
+    [TR[0] - 30, T[1] + 14],     // H12: near top-right
   ];
 
   for (let i = 0; i < 12; i++) {
