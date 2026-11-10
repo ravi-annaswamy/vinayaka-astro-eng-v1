@@ -14,6 +14,15 @@ function isRetrograde(currentDeg, laterDeg) {
 }
 
 /**
+ * Check if planet is retrograde at an instant from its daily motion in longitude
+ * (the `speed` from calculatePlanetaryPositionsSwe(..., true)). Unlike the 12-hour
+ * comparison above, this agrees with Swiss Ephemeris for a planet near its station.
+ */
+function isRetrogradeBySpeed(speed) {
+  return speed < 0;
+}
+
+/**
  * Map from Tamil sign name to index (1-12).
  */
 function signNameToIndex(signName) {

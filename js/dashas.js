@@ -39,10 +39,12 @@ function getDashasTam(jd, nd) {
 /**
  * Uses Moon's position in degrees to populate dlist[] with dasha offsets.
  * @param {number} moonpos
- * @returns {number} natal_dasha 
+ * @param {boolean} [exact=false] - use the Moon's exact longitude and fractional-day offsets
+ *   instead of whole arcminutes and whole days (the app's default display is unchanged)
+ * @returns {number} natal_dasha
  */
-function calcdasha(moonpos) {
-  let moonmins = Math.floor(60 * moonpos);
+function calcdasha(moonpos, exact = false) {
+  let moonmins = exact ? 60 * moonpos : Math.floor(60 * moonpos);
   let natal_dasha = Math.floor(moonmins / 800) % 9;
   let elapsed = (moonmins % 800) / 800 * dashyr[natal_dasha] * 365.25;
   let m = natal_dasha;
@@ -55,7 +57,7 @@ function calcdasha(moonpos) {
 
     for (let b = 0; b < 9; b++) {
       let blen = (dashyr[bp] / 120) * dlen;
-      dlist[idx] = Math.floor(days_into - elapsed);
+      dlist[idx] = exact ? days_into - elapsed : Math.floor(days_into - elapsed);
       idx++;
       days_into += blen;
       if (++bp === 9) bp = 0;

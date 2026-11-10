@@ -20,8 +20,10 @@ function getAscFromHouseResult(result) {
 /**
  * Calculate planetary positions using Swiss Ephemeris.
  * Returns the same array format as the built-in engine.
+ * @param {boolean} [withSpeed=false] - also return each body's daily motion in longitude
+ *   as `speed` (degrees/day; negative = retrograde at that instant). Ascendant has none.
  */
-function calculatePlanetaryPositionsSwe(t, cityInfo) {
+function calculatePlanetaryPositionsSwe(t, cityInfo, withSpeed = false) {
   const swe = window.sweInstance;
   const jd = t * 36525.0 + 2451545.0;
 
@@ -31,7 +33,7 @@ function calculatePlanetaryPositionsSwe(t, cityInfo) {
   let geoLat = parseFloat(cityInfo.latitude.degrees) + parseFloat(cityInfo.latitude.minutes / 60);
   if (cityInfo.latitude.direction === 'S') geoLat *= -1;
 
-  const flags = swe.SEFLG_SWIEPH | swe.SEFLG_SIDEREAL;
+  const flags = swe.SEFLG_SWIEPH | swe.SEFLG_SIDEREAL | (withSpeed ? swe.SEFLG_SPEED : 0);
 
   // --- Ascendant ---
   // Get tropical ascendant from houses(), then subtract ayanamsa
@@ -55,13 +57,16 @@ function calculatePlanetaryPositionsSwe(t, cityInfo) {
     swe.SE_MEAN_NODE   // pp[8] = Rahu (mean node)
   ];
 
+  let speeds = new Array(10).fill(null);
   for (let i = 0; i < sweBodyIds.length; i++) {
     const pos = swe.calc_ut(jd, sweBodyIds[i], flags);
     pp[i + 1] = ((pos[0] % 360) + 360) % 360;
+    if (withSpeed) speeds[i + 1] = pos[3];
   }
 
   // Ketu = Rahu + 180°
   pp[9] = (pp[8] + 180) % 360;
+  speeds[9] = speeds[8];
 
   // --- Build planetaryPositions array (same format as built-in engine) ---
   let signIndices = chPlanets(pp);
@@ -75,7 +80,7 @@ function calculatePlanetaryPositionsSwe(t, cityInfo) {
     let nakshatraLord = nakshatraLordsTamil[nakshatraIndex % 27];
     let houseNumber = (signIndices[i] - signIndices[0] + 12) % 12 + 1;
 
-    planetaryPositions.push({
+    let entry = {
       name: planetNames[i],
       nakshatraPada: nakshatraPada.nakshatra + ' ' + nakshatraPada.pada,
       zodiacSign: zodiacSign,
@@ -83,7 +88,9 @@ function calculatePlanetaryPositionsSwe(t, cityInfo) {
       longitude: pp[i],
       nakshatraLord: nakshatraLord,
       houseNumber: houseNumber
-    });
+    };
+    if (withSpeed) entry.speed = speeds[i];
+    planetaryPositions.push(entry);
   }
 
   return planetaryPositions;
